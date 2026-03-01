@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Tip Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222222;
+    --border: #2e2e2e;
+    --text: #f5f5f0;
+    --muted: #888;
+    --green: #00ff88;
+    --green-dim: rgba(0,255,136,0.12);
+    --green-glow: rgba(0,255,136,0.3);
+    --accent: #ff6b35;
+    --radius: 18px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0;
+  }
+
+  .phone {
+    width: 100%;
+    max-width: 390px;
+    min-height: 100vh;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .phone::before {
+    content: '';
+    position: fixed;
+    top: -120px;
+    right: -80px;
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, rgba(0,255,136,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    position: relative;
+    z-index: 1;
+  }
+
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+
+  .content {
+    flex: 1;
+    padding: 8px 20px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .headline {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px;
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .headline em { font-style: italic; color: var(--green); }
+
+  .subtitle { font-size: 13px; color: var(--muted); font-weight: 400; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  /* ── Receipt Upload Card ── */
+  .receipt-card {
+    background: var(--surface);
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    transition: border-color 0.25s, border-style 0.25s;
+  }
+  .receipt-card.has-image  { border-style: solid; border-color: #3a3a3a; }
+  .receipt-card.scanning   { border-style: solid; border-color: var(--green); }
+
+  .upload-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 10px 0 4px;
+  }
+
+  .upload-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    transition: transform 0.15s;
+  }
+  .upload-zone:active .upload-icon { transform: scale(0.93); }
+
+  .upload-text { text-align: center; }
+  .upload-text strong { display: block; font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+  .upload-text span   { font-size: 12px; color: var(--muted); }
+
+  #receiptInput { display: none; }
+
+  .receipt-preview {
+    display: none;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .receipt-preview img {
+    width: 100%;
+    max-height: 160px;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+  }
+  .clear-btn {
+    position: absolute; top: 8px; right: 8px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.75);
+    border: none; color: white;
+    font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .scan-btn {
+    margin-top: 12px; width: 100%;
+    padding: 14px; border-radius: 14px;
+    background: var(--green-dim);
+    border: 1.5px solid var(--green);
+    color: var(--green);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    display: none; align-items: center; justify-content: center; gap: 8px;
+    transition: transform 0.15s;
+  }
+  .scan-btn:active { transform: scale(0.97); }
+  .scan-btn.visible { display: flex; }
+  .scan-btn:disabled { opacity: 0.5; cursor: default; }
+
+  .scan-status {
+    display: none; align-items: center; gap: 10px;
+    padding: 10px 0 2px; font-size: 13px; color: var(--green);
+  }
+  .scan-status.visible { display: flex; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(0,255,136,0.25);
+    border-top-color: var(--green);
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+    flex-shrink: 0;
+  }
+
+  .detected-badge {
+    display: none; align-items: center; gap: 6px;
+    margin-top: 10px; padding: 8px 12px;
+    background: var(--green-dim);
+    border: 1px solid rgba(0,255,136,0.3);
+    border-radius: 10px;
+    font-size: 12px; color: var(--green); font-weight: 500;
+  }
+  .detected-badge.visible { display: flex; }
+  .detected-badge strong { font-size: 14px; }
+
+  .error-badge {
+    display: none; margin-top: 10px; padding: 8px 12px;
+    background: rgba(255,107,53,0.1);
+    border: 1px solid rgba(255,107,53,0.3);
+    border-radius: 10px;
+    font-size: 12px; color: var(--accent); line-height: 1.4;
+  }
+  .error-badge.visible { display: block; }
+
+  /* ── Bill Input ── */
+  .bill-input-wrap {
+    display: flex; align-items: center; gap: 8px;
+    border-radius: 10px; padding: 4px 0;
+    transition: background 0.4s;
+  }
+  .bill-input-wrap.flash { background: rgba(0,255,136,0.18); }
+
+  .currency-symbol {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px; color: var(--muted); line-height: 1; padding-bottom: 2px;
+  }
+
+  input[type="number"] {
+    background: none; border: none; outline: none;
+    color: var(--text);
+    font-family: 'DM Serif Display', serif;
+    font-size: 42px; font-weight: 400; width: 100%;
+    caret-color: var(--green);
+    -webkit-appearance: none; appearance: none;
+  }
+  input[type="number"]::placeholder { color: var(--border); }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+  /* ── Emoji Service Selector ── */
+  .service-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+
+  .service-btn {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 4px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    user-select: none;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .service-btn:active { transform: scale(0.92); }
+
+  .service-emoji {
+    font-size: 30px;
+    line-height: 1;
+    display: block;
+    transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .service-btn:active .service-emoji { transform: scale(1.2); }
+
+  .service-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .service-pct {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--border);
+    font-family: 'DM Sans', sans-serif;
+    transition: color 0.2s;
+  }
+
+  .service-btn.active {
+    border-color: var(--green);
+    background: var(--green-dim);
+    box-shadow: 0 0 18px var(--green-glow);
+    transform: scale(1.06);
+  }
+  .service-btn.active .service-label { color: rgba(0,255,136,0.7); }
+  .service-btn.active .service-pct   { color: var(--green); }
+
+  /* ── Stepper ── */
+  .stepper {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface2); border-radius: 14px; padding: 4px;
+  }
+  .step-btn {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s; user-select: none; line-height: 1;
+  }
+  .step-btn:active { transform: scale(0.9); background: var(--border); }
+  .step-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px; flex: 1; text-align: center;
+  }
+
+  /* ── Results ── */
+  .results-card {
+    background: var(--green-dim);
+    border: 1.5px solid var(--green);
+    border-radius: var(--radius);
+    padding: 20px; position: relative; overflow: hidden;
+  }
+  .results-card::before {
+    content: ''; position: absolute;
+    top: -40px; right: -40px; width: 120px; height: 120px;
+    background: radial-gradient(circle, var(--green-glow) 0%, transparent 70%);
+    border-radius: 50%; pointer-events: none;
+  }
+  .results-headline {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 16px;
+  }
+  .result-row {
+    display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;
+  }
+  .result-row:last-child { margin-bottom: 0; }
+  .result-label { font-size: 13px; color: rgba(0,255,136,0.65); font-weight: 500; }
+  .result-value {
+    font-family: 'DM Serif Display', serif; font-size: 26px;
+    color: var(--green); text-shadow: 0 0 20px var(--green-glow);
+    transition: all 0.2s;
+  }
+  .result-value.big { font-size: 38px; }
+  .results-divider { height: 1px; background: rgba(0,255,136,0.2); margin: 12px 0; }
+  .empty-hint {
+    font-size: 13px; color: rgba(0,255,136,0.4);
+    font-style: italic; text-align: center; padding: 6px 0;
+    font-family: 'DM Serif Display', serif;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .receipt-card { animation: fadeUp 0.38s ease both 0.02s; }
+  .card, .results-card { animation: fadeUp 0.38s ease both; }
+
+  @keyframes pop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+  .result-value.pop { animation: pop 0.22s ease; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar">
+    <span>9:41</span>
+    <div class="status-icons"><span>●●●</span><span>WiFi</span><span>⚡</span></div>
+  </div>
+
+  <div class="content">
+    <div>
+      <h1 class="headline"><strong>Tip</strong><br><em>Calculator</em></h1>
+      <p class="subtitle">Split smarter, pay fairer</p>
+    </div>
+
+    <!-- ░░ Receipt Upload ░░ -->
+    <div class="receipt-card" id="receiptCard">
+      <div class="label">📷 Scan Receipt</div>
+
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-icon">🧾</div>
+        <div class="upload-text">
+          <strong>Upload a receipt photo</strong>
+          <span>Tap to use camera or choose from library</span>
+        </div>
+      </div>
+
+      <input type="file" id="receiptInput" accept="image/*" capture="environment">
+
+      <div class="receipt-preview" id="receiptPreview">
+        <img id="previewImg" src="" alt="Receipt preview">
+        <button class="clear-btn" id="clearBtn" aria-label="Remove receipt">✕</button>
+      </div>
+
+      <div class="scan-status" id="scanStatus">
+        <div class="spinner"></div>
+        <span>Reading your receipt with AI…</span>
+      </div>
+
+      <button class="scan-btn" id="scanBtn">✦ Extract Bill Total</button>
+
+      <div class="detected-badge" id="detectedBadge">
+        ✓ Detected total: <strong id="detectedAmount"></strong> — auto-filled below
+      </div>
+      <div class="error-badge" id="errorBadge"></div>
+    </div>
+
+    <!-- ░░ Bill Amount ░░ -->
+    <div class="card">
+      <div class="label">Bill Amount</div>
+      <div class="bill-input-wrap" id="billInputWrap">
+        <span class="currency-symbol">$</span>
+        <input type="number" id="billInput" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
+      </div>
+    </div>
+
+    <!-- ░░ Service Rating ░░ -->
+    <div class="card">
+      <div class="label">How was the service?</div>
+      <div class="service-grid">
+        <div class="service-btn" data-tip="10">
+          <span class="service-emoji">😐</span>
+          <span class="service-label">Meh</span>
+          <span class="service-pct">10%</span>
+        </div>
+        <div class="service-btn active" data-tip="15">
+          <span class="service-emoji">🙂</span>
+          <span class="service-label">Good</span>
+          <span class="service-pct">15%</span>
+        </div>
+        <div class="service-btn" data-tip="20">
+          <span class="service-emoji">😄</span>
+          <span class="service-label">Great</span>
+          <span class="service-pct">20%</span>
+        </div>
+        <div class="service-btn" data-tip="25">
+          <span class="service-emoji">🤩</span>
+          <span class="service-label">Amazing!</span>
+          <span class="service-pct">25%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ░░ People ░░ -->
+    <div class="card">
+      <div class="label">Split Between</div>
+      <div class="stepper">
+        <div class="step-btn" id="decreaseBtn">−</div>
+        <div class="step-value" id="peopleCount">2</div>
+        <div class="step-btn" id="increaseBtn">+</div>
+      </div>
+    </div>
+
+    <!-- ░░ Results ░░ -->
+    <div class="results-card">
+      <div class="results-headline">✦ Your Calculation</div>
+      <div id="resultsContent">
+        <div class="empty-hint">Enter a bill amount to begin</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let bill = 0, tipPct = 15, people = 2;
+  let imageBase64 = null, imageMime = 'image/jpeg';
+
+  const $ = id => document.getElementById(id);
+  const billInput     = $('billInput');
+  const billInputWrap = $('billInputWrap');
+  const peopleCount   = $('peopleCount');
+  const resultsContent= $('resultsContent');
+  const receiptCard   = $('receiptCard');
+  const uploadZone    = $('uploadZone');
+  const receiptInput  = $('receiptInput');
+  const receiptPreview= $('receiptPreview');
+  const previewImg    = $('previewImg');
+  const clearBtn      = $('clearBtn');
+  const scanBtn       = $('scanBtn');
+  const scanStatus    = $('scanStatus');
+  const detectedBadge = $('detectedBadge');
+  const detectedAmount= $('detectedAmount');
+  const errorBadge    = $('errorBadge');
+
+  /* ── Formatting ── */
+  function fmt(n) {
+    return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  /* ── Calculator ── */
+  function calculate() {
+    if (!bill || bill <= 0) {
+      resultsContent.innerHTML = '<div class="empty-hint">Enter a bill amount to begin</div>';
+      return;
+    }
+    const tipAmt   = bill * tipPct / 100;
+    const total    = bill + tipAmt;
+    const perPerson= total / people;
+    const tipPP    = tipAmt / people;
+
+    resultsContent.innerHTML = `
+      <div class="result-row">
+        <span class="result-label">Tip Rate</span>
+        <span class="result-value" id="rv0">${tipPct}%</span>
+      </div>
+      <div class="results-divider"></div>
+      <div class="result-row">
+        <span class="result-label">Tip Amount</span>
+        <span class="result-value" id="rv1">${fmt(tipAmt)}</span>
+      </div>
+      <div class="results-divider"></div>
+      <div class="result-row">
+        <span class="result-label">Total Bill</span>
+        <span class="result-value" id="rv2">${fmt(total)}</span>
+      </div>
+      <div class="results-divider"></div>
+      <div class="result-row">
+        <span class="result-label">Each Person Pays</span>
+        <span class="result-value big" id="rv3">${fmt(perPerson)}</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Tip per Person</span>
+        <span class="result-value" id="rv4">${fmt(tipPP)}</span>
+      </div>`;
+
+    ['rv0','rv1','rv2','rv3','rv4'].forEach(id => {
+      const el = $(id);
+      if (!el) return;
+      el.classList.remove('pop');
+      void el.offsetWidth;
+      el.classList.add('pop');
+    });
+  }
+
+  billInput.addEventListener('input', () => {
+    bill = parseFloat(billInput.value) || 0;
+    calculate();
+  });
+
+  document.querySelectorAll('.service-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.service-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      tipPct = parseInt(btn.dataset.tip);
+      calculate();
+    });
+  });
+
+  $('increaseBtn').addEventListener('click', () => {
+    if (people < 20) { people++; peopleCount.textContent = people; calculate(); }
+  });
+  $('decreaseBtn').addEventListener('click', () => {
+    if (people > 1)  { people--; peopleCount.textContent = people; calculate(); }
+  });
+
+  /* ── Receipt Image Handling ── */
+  uploadZone.addEventListener('click', () => receiptInput.click());
+
+  receiptInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    imageMime = file.type || 'image/jpeg';
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+      imageBase64 = ev.target.result.split(',')[1];
+      previewImg.src = ev.target.result;
+      uploadZone.style.display = 'none';
+      receiptPreview.style.display = 'block';
+      scanBtn.classList.add('visible');
+      receiptCard.classList.add('has-image');
+      detectedBadge.classList.remove('visible');
+      errorBadge.classList.remove('visible');
+    };
+    reader.readAsDataURL(file);
+  });
+
+  clearBtn.addEventListener('click', () => {
+    imageBase64 = null;
+    receiptInput.value = '';
+    previewImg.src = '';
+    receiptPreview.style.display = 'none';
+    uploadZone.style.display = 'flex';
+    scanBtn.classList.remove('visible');
+    scanStatus.classList.remove('visible');
+    detectedBadge.classList.remove('visible');
+    errorBadge.classList.remove('visible');
+    receiptCard.classList.remove('has-image', 'scanning');
+  });
+
+  /* ── AI Receipt Scan ── */
+  scanBtn.addEventListener('click', async () => {
+    if (!imageBase64) return;
+
+    scanBtn.disabled = true;
+    scanStatus.classList.add('visible');
+    receiptCard.classList.add('scanning');
+    detectedBadge.classList.remove('visible');
+    errorBadge.classList.remove('visible');
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 100,
+          messages: [{
+            role: 'user',
+            content: [
+              {
+                type: 'image',
+                source: { type: 'base64', media_type: imageMime, data: imageBase64 }
+              },
+              {
+                type: 'text',
+                text: 'Look at this receipt. Find the grand total the customer owes — typically labelled "Total", "Amount Due", "Grand Total", or "Balance". Include tax if shown. Do NOT include any tip already added. Reply with ONLY the numeric value, up to 2 decimal places, no currency symbol, no extra words. Example: 47.83. If no clear total is found, reply: NONE'
+              }
+            ]
+          }]
+        })
+      });
+
+      if (!res.ok) throw new Error(`API error ${res.status}. Please try again.`);
+
+      const data = await res.json();
+      const raw  = (data.content?.[0]?.text || '').trim();
+
+      if (!raw || raw.toUpperCase() === 'NONE') {
+        throw new Error("No total found on this receipt. Please type the amount manually.");
+      }
+
+      const parsed = parseFloat(raw.replace(/[^0-9.]/g, ''));
+      if (isNaN(parsed) || parsed <= 0) {
+        throw new Error("Couldn't read a valid total. Please type the amount manually.");
+      }
+
+      // Auto-fill
+      bill = parsed;
+      billInput.value = parsed.toFixed(2);
+      detectedAmount.textContent = fmt(parsed);
+      detectedBadge.classList.add('visible');
+
+      // Flash the bill field
+      billInputWrap.classList.remove('flash');
+      void billInputWrap.offsetWidth;
+      billInputWrap.classList.add('flash');
+      setTimeout(() => billInputWrap.classList.remove('flash'), 800);
+
+      calculate();
+
+      // Smooth-scroll to results
+      setTimeout(() => {
+        document.querySelector('.results-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 350);
+
+    } catch (err) {
+      errorBadge.textContent = err.message || 'Something went wrong. Please try again.';
+      errorBadge.classList.add('visible');
+    } finally {
+      scanStatus.classList.remove('visible');
+      scanBtn.disabled = false;
+      receiptCard.classList.remove('scanning');
+    }
+  });
+</script>
+</body>
+</html>
