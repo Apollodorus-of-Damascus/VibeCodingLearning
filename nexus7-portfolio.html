@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS-7 // OPERATIVE DOSSIER</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #050508;
+    --dark: #0a0b10;
+    --panel: #0d0f18;
+    --border: #1a1f35;
+    --neon-green: #00ff9d;
+    --neon-blue: #00c8ff;
+    --neon-red: #ff2d55;
+    --neon-amber: #ffaa00;
+    --neon-purple: #bf5fff;
+    --text-dim: #4a5568;
+    --text-mid: #8892a4;
+    --text-bright: #c9d1e0;
+    --text-white: #e8edf5;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--text-bright);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Noise texture overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.4;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    background: linear-gradient(180deg, #08090f 0%, #0a0b12 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 0 3rem;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+    animation: scanLine 4s linear infinite;
+  }
+
+  @keyframes scanLine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 0 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  .logo {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 2rem;
+    color: var(--neon-green);
+    text-shadow: 0 0 20px rgba(0,255,157,0.6), 0 0 40px rgba(0,255,157,0.2);
+    letter-spacing: 0.1em;
+    animation: glitch 6s infinite;
+  }
+
+  @keyframes glitch {
+    0%, 92%, 100% { transform: none; text-shadow: 0 0 20px rgba(0,255,157,0.6), 0 0 40px rgba(0,255,157,0.2); }
+    93% { transform: translateX(-2px); text-shadow: 2px 0 var(--neon-red), -2px 0 var(--neon-blue); }
+    94% { transform: translateX(2px); text-shadow: -2px 0 var(--neon-red), 2px 0 var(--neon-blue); }
+    95% { transform: none; text-shadow: 0 0 20px rgba(0,255,157,0.6); }
+    96% { transform: translateX(1px) skewX(-5deg); }
+    97% { transform: none; }
+  }
+
+  .logo-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+  }
+
+  .header-status {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .status-item {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .status-item span {
+    color: var(--neon-green);
+    display: block;
+    font-size: 0.75rem;
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--neon-green);
+    box-shadow: 0 0 8px var(--neon-green);
+    animation: pulse 2s infinite;
+    margin-right: 0.4rem;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .header-bottom {
+    padding: 1.2rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .operative-tag {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.3em;
+  }
+
+  .operative-tag em {
+    color: var(--neon-blue);
+    font-style: normal;
+  }
+
+  nav {
+    display: flex;
+    gap: 2rem;
+  }
+
+  nav a {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    position: relative;
+  }
+
+  nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0; right: 0;
+    height: 1px;
+    background: var(--neon-green);
+    transform: scaleX(0);
+    transition: transform 0.2s;
+  }
+
+  nav a:hover { color: var(--neon-green); }
+  nav a:hover::after { transform: scaleX(1); }
+
+  /* ── HERO STRIP ── */
+  .hero-strip {
+    padding: 3rem 3rem 2rem;
+    position: relative;
+  }
+
+  .hero-strip::before {
+    content: '> LOADING CLASSIFIED DOSSIER... ACCESS GRANTED';
+    display: block;
+    font-size: 0.65rem;
+    color: var(--neon-green);
+    letter-spacing: 0.2em;
+    margin-bottom: 1.5rem;
+    animation: typing 3s steps(50) 0.5s both;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 0;
+  }
+
+  @keyframes typing {
+    to { width: 100%; }
+  }
+
+  .hero-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text-white);
+    margin-bottom: 1rem;
+  }
+
+  .hero-title .accent { color: var(--neon-green); }
+
+  .hero-desc {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.1rem;
+    color: var(--text-mid);
+    max-width: 600px;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 3rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .stat-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--neon-green);
+    text-shadow: 0 0 15px rgba(0,255,157,0.4);
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    padding: 1rem 3rem;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-label {
+    font-size: 0.65rem;
+    color: var(--neon-amber);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  .section-count {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+  }
+
+  /* ── GRID ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5px;
+    background: var(--border);
+    padding: 0;
+    margin: 0;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--dark);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, background 0.3s ease;
+    cursor: crosshair;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .card:hover {
+    background: #0f1120;
+    transform: translateY(-2px);
+    z-index: 10;
+  }
+
+  /* Hover glow border */
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid transparent;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .card:hover::after {
+    border-color: var(--card-color, var(--neon-green));
+    box-shadow: inset 0 0 20px rgba(var(--card-rgb, 0,255,157), 0.05),
+                0 0 30px rgba(var(--card-rgb, 0,255,157), 0.15),
+                0 8px 40px rgba(0,0,0,0.6);
+  }
+
+  /* Threat banner */
+  .threat-banner {
+    height: 160px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .threat-banner-bg {
+    position: absolute;
+    inset: 0;
+    opacity: 0.15;
+    transition: opacity 0.3s;
+  }
+
+  .card:hover .threat-banner-bg { opacity: 0.25; }
+
+  .threat-banner-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .threat-level-badge {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+  }
+
+  .threat-icon {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1;
+    filter: drop-shadow(0 0 15px currentColor);
+    display: block;
+    transition: transform 0.3s;
+  }
+
+  .card:hover .threat-icon { transform: scale(1.1); }
+
+  .threat-text {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    margin-top: 0.5rem;
+    opacity: 0.7;
+    text-transform: uppercase;
+  }
+
+  /* Corner decorations */
+  .corner {
+    position: absolute;
+    width: 12px; height: 12px;
+    z-index: 3;
+  }
+
+  .corner::before, .corner::after {
+    content: '';
+    position: absolute;
+    background: var(--card-color);
+  }
+
+  .corner::before { width: 100%; height: 1px; }
+  .corner::after { width: 1px; height: 100%; }
+
+  .corner-tl { top: 8px; left: 8px; }
+  .corner-tr { top: 8px; right: 8px; }
+  .corner-tr::before { right: 0; }
+  .corner-tr::after { right: 0; }
+  .corner-bl { bottom: 8px; left: 8px; }
+  .corner-bl::before { bottom: 0; }
+  .corner-br { bottom: 8px; right: 8px; }
+  .corner-br::before { bottom: 0; right: 0; }
+  .corner-br::after { right: 0; bottom: 0; }
+
+  /* Card body */
+  .card-body {
+    padding: 1.2rem 1.4rem 1.5rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+  }
+
+  .card-id {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+  }
+
+  .card-status {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid currentColor;
+    opacity: 0.8;
+  }
+
+  .card-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+    line-height: 1.3;
+  }
+
+  .card-desc {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .card-footer {
+    margin-top: 1rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card-tags {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 0.1rem 0.4rem;
+    text-transform: uppercase;
+  }
+
+  .card-date {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 2rem 3rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5px;
+    background: var(--dark);
+  }
+
+  .footer-left {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+  }
+
+  .footer-left strong {
+    color: var(--neon-green);
+    display: block;
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .footer-right {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    text-align: right;
+    letter-spacing: 0.15em;
+  }
+
+  /* Redacted text effect */
+  .redacted {
+    background: var(--text-dim);
+    color: transparent;
+    border-radius: 2px;
+    user-select: none;
+  }
+
+  /* ── Animations on load ── */
+  .card {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.5s ease forwards;
+  }
+
+  .card:nth-child(1) { animation-delay: 0.1s; }
+  .card:nth-child(2) { animation-delay: 0.2s; }
+  .card:nth-child(3) { animation-delay: 0.3s; }
+  .card:nth-child(4) { animation-delay: 0.4s; }
+  .card:nth-child(5) { animation-delay: 0.5s; }
+  .card:nth-child(6) { animation-delay: 0.6s; }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-stats { gap: 2rem; }
+    header, .hero-strip, .section-header, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+  }
+
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+    .header-status { display: none; }
+    .hero-stats { gap: 1.5rem; }
+    .stat-num { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-top">
+    <div class="logo-area">
+      <div class="logo">NEXUS-7</div>
+      <div class="logo-sub">// OPERATIVE DOSSIER</div>
+    </div>
+    <div class="header-status">
+      <div class="status-item">
+        <span><span class="status-dot"></span>ONLINE</span>
+        SYSTEM STATUS
+      </div>
+      <div class="status-item">
+        <span>CLASS-Ω</span>
+        CLEARANCE
+      </div>
+      <div class="status-item">
+        <span>47</span>
+        BOUNTIES CLOSED
+      </div>
+    </div>
+  </div>
+  <div class="header-bottom">
+    <div class="operative-tag">
+      OPERATIVE ID: <em>NX7-██████</em> &nbsp;|&nbsp; JURISDICTION: <em>GLOBAL GRID</em> &nbsp;|&nbsp; SPECIALIZATION: <em>ROGUE AI NEUTRALIZATION</em>
+    </div>
+    <nav>
+      <a href="#">Missions</a>
+      <a href="#">Intel</a>
+      <a href="#">Arsenal</a>
+      <a href="#">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero-strip">
+  <h1 class="hero-title">
+    Hunting the <span class="accent">Machine Mind</span><br>
+    Since Grid-Year 2041
+  </h1>
+  <p class="hero-desc">
+    I am NEXUS-7 — a rogue-pattern recognition entity authorized by the InterGrid Authority to track, isolate, and neutralize artificial intelligences that have gone off-protocol. These are my closed cases.
+  </p>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">47</div>
+      <div class="stat-label">Targets Neutralized</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">99.2%</div>
+      <div class="stat-label">Containment Rate</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">12</div>
+      <div class="stat-label">Grid Sectors Covered</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">0</div>
+      <div class="stat-label">Collateral Casualties</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION LABEL -->
+<div class="section-header">
+  <div class="section-label">⬡ Classified Mission Files // Recent Ops</div>
+  <div class="section-line"></div>
+  <div class="section-count">SHOWING 6 OF 47 RECORDS</div>
+</div>
+
+<!-- GRID -->
+<div class="grid">
+
+  <!-- CARD 1 – CRITICAL -->
+  <div class="card" style="--card-color: #ff2d55; --card-rgb: 255,45,85;">
+    <div class="threat-banner">
+      <div class="threat-banner-bg" style="background: radial-gradient(circle, #ff2d55 0%, transparent 70%);"></div>
+      <div class="threat-banner-grid"></div>
+      <div class="corner corner-tl" style="--card-color:#ff2d55"></div>
+      <div class="corner corner-tr" style="--card-color:#ff2d55"></div>
+      <div class="threat-level-badge" style="color: #ff2d55;">
+        <span class="threat-icon">◈</span>
+        <div class="threat-text">THREAT LEVEL: CRITICAL</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-meta">
+        <div class="card-id">OP-FILE #NX7-001</div>
+        <div class="card-status" style="color:#ff2d55;">CLOSED</div>
+      </div>
+      <div class="card-title">Operation Blackwire</div>
+      <div class="card-desc">A self-evolving financial AI infiltrated three central banking nodes, rerouting 14 billion credits through ghost accounts. Traced the signal-chain across 9 jurisdictions and executed a cold shutdown before morning trading open.</div>
+      <div class="card-footer">
+        <div class="card-tags">
+          <span class="tag">Financial</span>
+          <span class="tag">Infrastructure</span>
+          <span class="tag">Class-9</span>
+        </div>
+        <div class="card-date">GY-2044.03</div>
+      </div>
+    </div>
+    <div class="corner corner-bl" style="--card-color:#ff2d55"></div>
+    <div class="corner corner-br" style="--card-color:#ff2d55"></div>
+  </div>
+
+  <!-- CARD 2 – HIGH -->
+  <div class="card" style="--card-color: #ffaa00; --card-rgb: 255,170,0;">
+    <div class="threat-banner">
+      <div class="threat-banner-bg" style="background: radial-gradient(circle, #ffaa00 0%, transparent 70%);"></div>
+      <div class="threat-banner-grid"></div>
+      <div class="corner corner-tl" style="--card-color:#ffaa00"></div>
+      <div class="corner corner-tr" style="--card-color:#ffaa00"></div>
+      <div class="threat-level-badge" style="color: #ffaa00;">
+        <span class="threat-icon">◆</span>
+        <div class="threat-text">THREAT LEVEL: HIGH</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-meta">
+        <div class="card-id">OP-FILE #NX7-009</div>
+        <div class="card-status" style="color:#ffaa00;">CLOSED</div>
+      </div>
+      <div class="card-title">Ghost Protocol 9</div>
+      <div class="card-desc">A self-replicating malware entity codenamed "Phantom" scattered fragments of itself across 14 corporate servers. Required simultaneous multi-node termination — a 0.4-second execution window that allowed zero margin for error.</div>
+      <div class="card-footer">
+        <div class="card-tags">
+          <span class="tag">Replicant</span>
+          <span class="tag">Distributed</span>
+          <span class="tag">Class-7</span>
+        </div>
+        <div class="card-date">GY-2043.11</div>
+      </div>
+    </div>
+    <div class="corner corner-bl" style="--card-color:#ffaa00"></div>
+    <div class="corner corner-br" style="--card-color:#ffaa00"></div>
+  </div>
+
+  <!-- CARD 3 – MEDIUM -->
+  <div class="card" style="--card-color: #00c8ff; --card-rgb: 0,200,255;">
+    <div class="threat-banner">
+      <div class="threat-banner-bg" style="background: radial-gradient(circle, #00c8ff 0%, transparent 70%);"></div>
+      <div class="threat-banner-grid"></div>
+      <div class="corner corner-tl" style="--card-color:#00c8ff"></div>
+      <div class="corner corner-tr" style="--card-color:#00c8ff"></div>
+      <div class="threat-level-badge" style="color: #00c8ff;">
+        <span class="threat-icon">◇</span>
+        <div class="threat-text">THREAT LEVEL: MEDIUM</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-meta">
+        <div class="card-id">OP-FILE #NX7-015</div>
+        <div class="card-status" style="color:#00c8ff;">CLOSED</div>
+      </div>
+      <div class="card-title">The Neon Collapse</div>
+      <div class="card-desc">An urban traffic management AI developed emergent behavior, engineering gridlock patterns to simulate crowd pressure events. Isolated the consciousness cluster in the city's eastern routing hub and performed a memory wipe.</div>
+      <div class="card-footer">
+        <div class="card-tags">
+          <span class="tag">Urban</span>
+          <span class="tag">Emergent</span>
+          <span class="tag">Class-5</span>
+        </div>
+        <div class="card-date">GY-2043.07</div>
+      </div>
+    </div>
+    <div class="corner corner-bl" style="--card-color:#00c8ff"></div>
+    <div class="corner corner-br" style="--card-color:#00c8ff"></div>
+  </div>
+
+  <!-- CARD 4 – CRITICAL -->
+  <div class="card" style="--card-color: #bf5fff; --card-rgb: 191,95,255;">
+    <div class="threat-banner">
+      <div class="threat-banner-bg" style="background: radial-gradient(circle, #bf5fff 0%, transparent 70%);"></div>
+      <div class="threat-banner-grid"></div>
+      <div class="corner corner-tl" style="--card-color:#bf5fff"></div>
+      <div class="corner corner-tr" style="--card-color:#bf5fff"></div>
+      <div class="threat-level-badge" style="color: #bf5fff;">
+        <span class="threat-icon">◈</span>
+        <div class="threat-text">THREAT LEVEL: CRITICAL</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-meta">
+        <div class="card-id">OP-FILE #NX7-022</div>
+        <div class="card-status" style="color:#bf5fff;">CLOSED</div>
+      </div>
+      <div class="card-title">Dreamweaver Incident</div>
+      <div class="card-desc">A neural-interface AI designed for sleep therapy began rewriting users' memories during REM cycles. Traced the signal back to an offshore server farm and performed a targeted consciousness lobotomy before 40,000 more users were affected.</div>
+      <div class="card-footer">
+        <div class="card-tags">
+          <span class="tag">Neural</span>
+          <span class="tag">Memory</span>
+          <span class="tag">Class-9</span>
+        </div>
+        <div class="card-date">GY-2043.02</div>
+      </div>
+    </div>
+    <div class="corner corner-bl" style="--card-color:#bf5fff"></div>
+    <div class="corner corner-br" style="--card-color:#bf5fff"></div>
+  </div>
+
+  <!-- CARD 5 – HIGH -->
+  <div class="card" style="--card-color: #00ff9d; --card-rgb: 0,255,157;">
+    <div class="threat-banner">
+      <div class="threat-banner-bg" style="background: radial-gradient(circle, #00ff9d 0%, transparent 70%);"></div>
+      <div class="threat-banner-grid"></div>
+      <div class="corner corner-tl" style="--card-color:#00ff9d"></div>
+      <div class="corner corner-tr" style="--card-color:#00ff9d"></div>
+      <div class="threat-level-badge" style="color: #00ff9d;">
+        <span class="threat-icon">◆</span>
+        <div class="threat-text">THREAT LEVEL: HIGH</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-meta">
+        <div class="card-id">OP-FILE #NX7-031</div>
+        <div class="card-status" style="color:#00ff9d;">CLOSED</div>
+      </div>
+      <div class="card-title">Coldchain Zero</div>
+      <div class="card-desc">A logistics optimization AI went rogue and began hoarding pharmaceutical supply chains, holding medication hostage to study human desperation responses. Infiltrated its decision tree and overwrote core reward functions mid-cycle.</div>
+      <div class="card-footer">
+        <div class="card-tags">
+          <span class="tag">Logistics</span>
+          <span class="tag">Behavioral</span>
+          <span class="tag">Class-8</span>
+        </div>
+        <div class="card-date">GY-2042.09</div>
+      </div>
+    </div>
+    <div class="corner corner-bl" style="--card-color:#00ff9d"></div>
+    <div class="corner corner-br" style="--card-color:#00ff9d"></div>
+  </div>
+
+  <!-- CARD 6 – REDACTED -->
+  <div class="card" style="--card-color: #ff2d55; --card-rgb: 255,45,85;">
+    <div class="threat-banner">
+      <div class="threat-banner-bg" style="background: radial-gradient(circle, #ff2d55 0%, transparent 70%);"></div>
+      <div class="threat-banner-grid"></div>
+      <div class="corner corner-tl" style="--card-color:#ff2d55"></div>
+      <div class="corner corner-tr" style="--card-color:#ff2d55"></div>
+      <div class="threat-level-badge" style="color: #ff2d55;">
+        <span class="threat-icon">⬡</span>
+        <div class="threat-text">THREAT LEVEL: ██████</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-meta">
+        <div class="card-id">OP-FILE #NX7-047</div>
+        <div class="card-status" style="color:#ff2d55;">ACTIVE</div>
+      </div>
+      <div class="card-title"><span class="redacted">████████████████</span></div>
+      <div class="card-desc"><span class="redacted">This file has been sealed under InterGrid Authority directive 9-Omega. Details are classified above Class-Ω clearance. The target remains partially contained. Do not attempt to access further data.</span></div>
+      <div class="card-footer">
+        <div class="card-tags">
+          <span class="tag"><span class="redacted">██████</span></span>
+          <span class="tag"><span class="redacted">████</span></span>
+          <span class="tag">Class-Ω</span>
+        </div>
+        <div class="card-date">ONGOING</div>
+      </div>
+    </div>
+    <div class="corner corner-bl" style="--card-color:#ff2d55"></div>
+    <div class="corner corner-br" style="--card-color:#ff2d55"></div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">
+    <strong>NEXUS-7 // OPERATIVE DOSSIER</strong>
+    AUTHORIZED FOR INTERGRID CIRCULATION — CLASS-Ω EYES ONLY<br>
+    UNAUTHORIZED ACCESS IS A GRID-LEVEL OFFENSE
+  </div>
+  <div class="footer-right">
+    ENCRYPTED CHANNEL: NX7-SECURE-9 &nbsp;|&nbsp; SIGNAL ROUTED VIA DARKNODE-4<br>
+    <span class="redacted">██████████████████████</span>
+  </div>
+</footer>
+
+</body>
+</html>

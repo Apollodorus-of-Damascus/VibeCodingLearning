@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANNALES ROMANI — Chronicles of the Republic</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --stone-dark:    #1c1a16;
+    --stone-mid:     #2e2a22;
+    --stone-light:   #3d3830;
+    --stone-surface: #4a4438;
+    --parchment-dark:#6b5d47;
+    --parchment-mid: #c4a97d;
+    --parchment-warm:#d4b896;
+    --parchment-pale:#e8d5b7;
+    --parchment-light:#f2e4c8;
+    --ink:           #1e1a14;
+    --blood:         #8b1a1a;
+    --blood-bright:  #c0392b;
+    --gold:          #c9a84c;
+    --gold-bright:   #e2c06a;
+    --gold-pale:     #f0d898;
+    --laurel:        #5a7a3a;
+    --text-body:     #c4a97d;
+    --text-dim:      #7a6a52;
+    --text-faint:    #4a3f30;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--stone-dark);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E"),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 60px,
+        rgba(255,255,255,0.008) 60px,
+        rgba(255,255,255,0.008) 61px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 60px,
+        rgba(255,255,255,0.006) 60px,
+        rgba(255,255,255,0.006) 61px
+      );
+    color: var(--text-body);
+    font-family: 'IM Fell English', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    background:
+      linear-gradient(180deg, #0e0c09 0%, #1a1710 40%, #221e15 100%);
+    border-bottom: 3px solid var(--gold);
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  /* Stone crack lines */
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(127deg, transparent 48%, rgba(255,255,255,0.04) 49%, rgba(255,255,255,0.04) 50%, transparent 51%),
+      linear-gradient(43deg, transparent 62%, rgba(255,255,255,0.03) 63%, rgba(255,255,255,0.03) 64%, transparent 65%),
+      linear-gradient(170deg, transparent 30%, rgba(255,255,255,0.02) 31%, rgba(255,255,255,0.02) 32%, transparent 33%);
+    pointer-events: none;
+  }
+
+  .header-ornament-top {
+    width: 100%;
+    height: 6px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--gold) 0px, var(--gold) 20px,
+      var(--stone-dark) 20px, var(--stone-dark) 24px
+    );
+    opacity: 0.6;
+  }
+
+  .header-inner {
+    padding: 2.5rem 3rem 0;
+  }
+
+  .header-top-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(201,168,76,0.25);
+  }
+
+  .logo-block {}
+
+  .spqr-badge {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.5em;
+    color: var(--gold);
+    opacity: 0.8;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .spqr-badge::before, .spqr-badge::after {
+    content: '';
+    flex: 1;
+    max-width: 40px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.5;
+  }
+
+  .logo {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    font-weight: 700;
+    color: var(--gold-pale);
+    letter-spacing: 0.08em;
+    line-height: 1.1;
+    text-shadow:
+      0 0 40px rgba(201,168,76,0.3),
+      2px 2px 0px rgba(0,0,0,0.8),
+      0 1px 3px rgba(0,0,0,0.9);
+  }
+
+  .logo-sub {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    color: var(--parchment-mid);
+    letter-spacing: 0.35em;
+    margin-top: 0.4rem;
+    opacity: 0.75;
+  }
+
+  .header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.6rem;
+  }
+
+  .header-date {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    text-align: right;
+  }
+
+  .header-date strong {
+    color: var(--gold);
+    display: block;
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+  }
+
+  nav {
+    display: flex;
+    gap: 2rem;
+    margin-top: 0.5rem;
+  }
+
+  nav a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    transition: color 0.25s;
+    position: relative;
+    padding-bottom: 3px;
+  }
+
+  nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s;
+  }
+
+  nav a:hover { color: var(--gold); }
+  nav a:hover::after { transform: scaleX(1); }
+
+  /* Hero band */
+  .header-hero {
+    padding: 2rem 0 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 3rem;
+    align-items: end;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    color: var(--blood-bright);
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .hero-eyebrow::after {
+    content: '';
+    flex: 1;
+    max-width: 80px;
+    height: 1px;
+    background: var(--blood);
+  }
+
+  .hero-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+    color: var(--parchment-light);
+    line-height: 1.4;
+    max-width: 600px;
+  }
+
+  .hero-title em {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    color: var(--gold-pale);
+  }
+
+  .hero-desc {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--text-body);
+    line-height: 1.8;
+    max-width: 560px;
+    margin-top: 1rem;
+    opacity: 0.85;
+  }
+
+  .hero-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border-left: 1px solid rgba(201,168,76,0.2);
+    padding-left: 2rem;
+  }
+
+  .h-stat {
+    text-align: right;
+  }
+
+  .h-stat-num {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.6rem;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(201,168,76,0.3);
+    line-height: 1;
+  }
+
+  .h-stat-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.25em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-top: 0.2rem;
+  }
+
+  /* Gold band divider */
+  .gold-band {
+    height: 3px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      var(--gold) 10%,
+      var(--gold-pale) 50%,
+      var(--gold) 90%,
+      transparent 100%
+    );
+    opacity: 0.7;
+  }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    padding: 1.2rem 3rem;
+    background: var(--stone-mid);
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    color: var(--gold);
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .section-rule {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(201,168,76,0.3), transparent);
+  }
+
+  .section-count {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    white-space: nowrap;
+  }
+
+  /* ── GRID ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--stone-dark);
+    padding: 2px;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--stone-mid);
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+    opacity: 0;
+    transform: translateY(24px);
+    animation: rise 0.6s ease forwards;
+    transition: background 0.3s;
+  }
+
+  .card:nth-child(1) { animation-delay: 0.15s; }
+  .card:nth-child(2) { animation-delay: 0.28s; }
+  .card:nth-child(3) { animation-delay: 0.41s; }
+  .card:nth-child(4) { animation-delay: 0.54s; }
+  .card:nth-child(5) { animation-delay: 0.67s; }
+  .card:nth-child(6) { animation-delay: 0.80s; }
+
+  @keyframes rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Parchment texture overlay per card */
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0.3'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23p)' opacity='0.06'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .card:hover {
+    background: #332e24;
+  }
+
+  /* Hover shadow lift */
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid transparent;
+    box-shadow: none;
+    transition: border-color 0.35s, box-shadow 0.35s;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .card:hover::after {
+    border-color: rgba(201,168,76,0.4);
+    box-shadow:
+      inset 0 0 30px rgba(201,168,76,0.04),
+      0 8px 50px rgba(0,0,0,0.7),
+      0 2px 20px rgba(139,26,26,0.15);
+  }
+
+  /* Illustration banner */
+  .card-banner {
+    height: 170px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .banner-bg {
+    position: absolute;
+    inset: 0;
+    opacity: 1;
+  }
+
+  /* Roman decorative pattern for each card */
+  .banner-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.12;
+    background-image:
+      repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 8px,
+        rgba(255,255,255,0.15) 8px,
+        rgba(255,255,255,0.15) 9px
+      );
+    transition: opacity 0.3s;
+  }
+
+  .card:hover .banner-pattern { opacity: 0.2; }
+
+  .banner-symbol {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+  }
+
+  .banner-icon {
+    font-size: 3.5rem;
+    line-height: 1;
+    display: block;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
+    transition: transform 0.35s;
+  }
+
+  .card:hover .banner-icon { transform: scale(1.08) translateY(-3px); }
+
+  .banner-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.35em;
+    margin-top: 0.5rem;
+    opacity: 0.7;
+    text-transform: uppercase;
+  }
+
+  /* Top & bottom banner ornament lines */
+  .banner-rule-top, .banner-rule-bottom {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    z-index: 3;
+  }
+
+  .banner-rule-top { top: 0; }
+  .banner-rule-bottom { bottom: 0; }
+
+  /* Card body */
+  .card-body {
+    padding: 1.3rem 1.5rem 1.6rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.7rem;
+  }
+
+  .card-era {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.25em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .card-type {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    padding: 0.15rem 0.6rem;
+    border: 1px solid currentColor;
+    text-transform: uppercase;
+  }
+
+  .card-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--parchment-light);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+    letter-spacing: 0.03em;
+  }
+
+  .card-subtitle {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--gold);
+    margin-bottom: 0.7rem;
+    opacity: 0.85;
+  }
+
+  .card-desc {
+    font-family: 'IM Fell English', serif;
+    font-size: 0.9rem;
+    color: var(--text-body);
+    line-height: 1.75;
+    opacity: 0.9;
+  }
+
+  .card-divider {
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.3;
+    margin: 1rem 0;
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .card-figures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .figure-tag {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    border: 1px solid var(--text-faint);
+    padding: 0.1rem 0.45rem;
+    text-transform: uppercase;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .card:hover .figure-tag {
+    color: var(--parchment-mid);
+    border-color: var(--parchment-dark);
+  }
+
+  .card-year {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* Corner ornaments */
+  .c-orn {
+    position: absolute;
+    width: 16px; height: 16px;
+    z-index: 4;
+    opacity: 0.4;
+    transition: opacity 0.3s;
+  }
+
+  .card:hover .c-orn { opacity: 0.8; }
+
+  .c-orn svg { width: 100%; height: 100%; }
+
+  .c-orn.tl { top: 6px; left: 6px; }
+  .c-orn.tr { top: 6px; right: 6px; transform: scaleX(-1); }
+  .c-orn.bl { bottom: 6px; left: 6px; transform: scaleY(-1); }
+  .c-orn.br { bottom: 6px; right: 6px; transform: scale(-1); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: #0e0c09;
+    border-top: 3px solid var(--gold);
+    padding: 2.5rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  footer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent, transparent 80px,
+      rgba(201,168,76,0.015) 80px,
+      rgba(201,168,76,0.015) 81px
+    );
+    pointer-events: none;
+  }
+
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-left {}
+
+  .footer-logo {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1rem;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
+  }
+
+  .footer-text {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    max-width: 400px;
+  }
+
+  .footer-right {
+    text-align: right;
+  }
+
+  .footer-quote {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--parchment-mid);
+    opacity: 0.7;
+    margin-bottom: 0.4rem;
+  }
+
+  .footer-attrib {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .footer-ornament-bottom {
+    width: 100%;
+    height: 4px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--gold) 0px, var(--gold) 20px,
+      transparent 20px, transparent 24px
+    );
+    opacity: 0.3;
+    margin-top: 2rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 960px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-stats { display: none; }
+    .header-hero { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+    header, .section-header, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .header-inner { padding: 1.5rem 1.5rem 0; }
+    nav { gap: 1.2rem; }
+    .header-right { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Corner ornament SVG reusable -->
+<svg style="display:none">
+  <symbol id="corner-orn" viewBox="0 0 16 16">
+    <path d="M0 16 L0 0 L16 0" fill="none" stroke="#c9a84c" stroke-width="1.5"/>
+    <circle cx="0" cy="0" r="2" fill="#c9a84c"/>
+  </symbol>
+</svg>
+
+<!-- ══════════════════════════════ HEADER ══════════════════════════════ -->
+<header>
+  <div class="header-ornament-top"></div>
+  <div class="header-inner">
+
+    <div class="header-top-row">
+      <div class="logo-block">
+        <div class="spqr-badge">S · P · Q · R</div>
+        <div class="logo">ANNALES ROMANI</div>
+        <div class="logo-sub">Chronicles of the Republic — A Record in Stone & Blood</div>
+      </div>
+      <div class="header-right">
+        <div class="header-date">
+          <strong>509 – 27 BC</strong>
+          THE ROMAN REPUBLIC
+        </div>
+        <nav>
+          <a href="#">Annals</a>
+          <a href="#">Figures</a>
+          <a href="#">Battles</a>
+          <a href="#">Senate</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="header-hero">
+      <div>
+        <div class="hero-eyebrow">Res Gestae Populi Romani</div>
+        <h1 class="hero-title">
+          Five Centuries of Glory,<br>
+          Conspiracy & <em>Conquest</em>
+        </h1>
+        <p class="hero-desc">
+          From the expulsion of the last king to the daggers of the Ides of March — 
+          here lie the pivotal upheavals that forged, shattered, and remade the Roman Republic. 
+          These are not myths. These are records.
+        </p>
+      </div>
+      <div class="hero-stats">
+        <div class="h-stat">
+          <div class="h-stat-num">482</div>
+          <div class="h-stat-label">Years of Republic</div>
+        </div>
+        <div class="h-stat">
+          <div class="h-stat-num">3</div>
+          <div class="h-stat-label">Civil Wars</div>
+        </div>
+        <div class="h-stat">
+          <div class="h-stat-num">XXIII</div>
+          <div class="h-stat-label">Stab Wounds</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="gold-band"></div>
+</header>
+
+<!-- ══════════════════════════════ SECTION BAR ══════════════════════════════ -->
+<div class="section-header">
+  <div class="section-label">⚔ Tabularium — Selected Records</div>
+  <div class="section-rule"></div>
+  <div class="section-count">VI OF CDLXXXII ANNI</div>
+</div>
+
+<!-- ══════════════════════════════ GRID ══════════════════════════════ -->
+<div class="grid">
+
+  <!-- ── CARD 1: Founding / Romulus ── -->
+  <div class="card">
+    <div class="card-banner">
+      <div class="banner-bg" style="background: linear-gradient(160deg, #2a1a0a 0%, #3d2510 60%, #1c1208 100%);"></div>
+      <div class="banner-pattern"></div>
+      <div class="banner-rule-top" style="background: linear-gradient(90deg, transparent, #8b1a1a, transparent);"></div>
+      <div class="banner-rule-bottom" style="background: linear-gradient(90deg, transparent, #8b1a1a, transparent);"></div>
+      <div class="banner-symbol" style="color: #c9a84c;">
+        <span class="banner-icon">🐺</span>
+        <div class="banner-label" style="color: #c9a84c;">Legendary Founding</div>
+      </div>
+    </div>
+    <div class="c-orn tl"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn tr"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn bl"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn br"><svg><use href="#corner-orn"/></svg></div>
+    <div class="card-body">
+      <div class="card-meta">
+        <div class="card-era">753 BC</div>
+        <div class="card-type" style="color: #c9a84c;">Myth & Founding</div>
+      </div>
+      <div class="card-title">Romulus & The She-Wolf</div>
+      <div class="card-subtitle">Fratrem occidit urbemque condidit.</div>
+      <div class="card-desc">
+        Suckled by a she-wolf on the banks of the Tiber, twin brothers Romulus and Remus quarrelled over the new city's sacred boundary. Romulus drew a furrow in the earth. Remus leapt over it in mockery. Romulus killed his own brother and named the city after himself. Rome was built on blood from its first breath.
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-footer">
+        <div class="card-figures">
+          <span class="figure-tag">Romulus</span>
+          <span class="figure-tag">Remus</span>
+          <span class="figure-tag">Tiber</span>
+        </div>
+        <div class="card-year">AUC I</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CARD 2: Expulsion of the Kings ── -->
+  <div class="card">
+    <div class="card-banner">
+      <div class="banner-bg" style="background: linear-gradient(160deg, #1a0a0a 0%, #2e1010 60%, #0e0606 100%);"></div>
+      <div class="banner-pattern"></div>
+      <div class="banner-rule-top" style="background: linear-gradient(90deg, transparent, #8b1a1a, transparent);"></div>
+      <div class="banner-rule-bottom" style="background: linear-gradient(90deg, transparent, #8b1a1a, transparent);"></div>
+      <div class="banner-symbol" style="color: #c0392b;">
+        <span class="banner-icon">👑</span>
+        <div class="banner-label" style="color: #c0392b;">Political Revolution</div>
+      </div>
+    </div>
+    <div class="c-orn tl"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn tr"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn bl"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn br"><svg><use href="#corner-orn"/></svg></div>
+    <div class="card-body">
+      <div class="card-meta">
+        <div class="card-era">509 BC</div>
+        <div class="card-type" style="color: #c0392b;">Revolution</div>
+      </div>
+      <div class="card-title">The Expulsion of Tarquinius</div>
+      <div class="card-subtitle">Libertas a tyranno vindicata est.</div>
+      <div class="card-desc">
+        When Sextus Tarquinius violated the noblewoman Lucretia, she declared her dishonour to her father and husband — then took her own life with a dagger. Her kinsman Lucius Junius Brutus roused the people, drove out King Tarquinius Superbus, and founded the Republic. The word "Rex" — king — became a curse in Rome forever after.
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-footer">
+        <div class="card-figures">
+          <span class="figure-tag">Brutus</span>
+          <span class="figure-tag">Lucretia</span>
+          <span class="figure-tag">Tarquin</span>
+        </div>
+        <div class="card-year">509 BC</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CARD 3: Hannibal / Second Punic War ── -->
+  <div class="card">
+    <div class="card-banner">
+      <div class="banner-bg" style="background: linear-gradient(160deg, #0a1020 0%, #101830 60%, #060c18 100%);"></div>
+      <div class="banner-pattern"></div>
+      <div class="banner-rule-top" style="background: linear-gradient(90deg, transparent, #1a4a8a, transparent);"></div>
+      <div class="banner-rule-bottom" style="background: linear-gradient(90deg, transparent, #1a4a8a, transparent);"></div>
+      <div class="banner-symbol" style="color: #4a8acc;">
+        <span class="banner-icon">🐘</span>
+        <div class="banner-label" style="color: #4a8acc;">Military Campaign</div>
+      </div>
+    </div>
+    <div class="c-orn tl"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn tr"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn bl"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn br"><svg><use href="#corner-orn"/></svg></div>
+    <div class="card-body">
+      <div class="card-meta">
+        <div class="card-era">218–202 BC</div>
+        <div class="card-type" style="color: #4a8acc;">War</div>
+      </div>
+      <div class="card-title">Hannibal at the Gates</div>
+      <div class="card-subtitle">Hannibal ad portas!</div>
+      <div class="card-desc">
+        The Carthaginian general Hannibal Barca crossed the Alps with war elephants in winter — an act so audacious Rome could scarcely believe the reports. At Cannae in 216 BC, he annihilated eight Roman legions in a single afternoon — perhaps 70,000 dead. Yet Rome refused to negotiate, rebuilt, and ultimately prevailed. Scipio Africanus carried the war to Carthage itself.
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-footer">
+        <div class="card-figures">
+          <span class="figure-tag">Hannibal</span>
+          <span class="figure-tag">Scipio</span>
+          <span class="figure-tag">Cannae</span>
+        </div>
+        <div class="card-year">216 BC</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CARD 4: Gracchi Brothers / Social Upheaval ── -->
+  <div class="card">
+    <div class="card-banner">
+      <div class="banner-bg" style="background: linear-gradient(160deg, #0f1a0a 0%, #192a10 60%, #0a1006 100%);"></div>
+      <div class="banner-pattern"></div>
+      <div class="banner-rule-top" style="background: linear-gradient(90deg, transparent, #3a7a1a, transparent);"></div>
+      <div class="banner-rule-bottom" style="background: linear-gradient(90deg, transparent, #3a7a1a, transparent);"></div>
+      <div class="banner-symbol" style="color: #6aaa3a;">
+        <span class="banner-icon">⚖</span>
+        <div class="banner-label" style="color: #6aaa3a;">Political Upheaval</div>
+      </div>
+    </div>
+    <div class="c-orn tl"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn tr"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn bl"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn br"><svg><use href="#corner-orn"/></svg></div>
+    <div class="card-body">
+      <div class="card-meta">
+        <div class="card-era">133–121 BC</div>
+        <div class="card-type" style="color: #6aaa3a;">Reform & Murder</div>
+      </div>
+      <div class="card-title">The Gracchi Brothers</div>
+      <div class="card-subtitle">Populares contra optimates.</div>
+      <div class="card-desc">
+        Tiberius Gracchus proposed redistributing the vast estates of the wealthy senatorial class to landless citizens. The Senate had him beaten to death in the Forum with broken chair legs. His younger brother Gaius took up the cause — and died likewise. Their murders cracked open a fault line that would swallow the Republic whole within a century.
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-footer">
+        <div class="card-figures">
+          <span class="figure-tag">Tiberius</span>
+          <span class="figure-tag">Gaius</span>
+          <span class="figure-tag">Senate</span>
+        </div>
+        <div class="card-year">133 BC</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CARD 5: Julius Caesar / Rubicon ── -->
+  <div class="card">
+    <div class="card-banner">
+      <div class="banner-bg" style="background: linear-gradient(160deg, #1a1500 0%, #2e2500 60%, #100e00 100%);"></div>
+      <div class="banner-pattern"></div>
+      <div class="banner-rule-top" style="background: linear-gradient(90deg, transparent, #c9a84c, transparent);"></div>
+      <div class="banner-rule-bottom" style="background: linear-gradient(90deg, transparent, #c9a84c, transparent);"></div>
+      <div class="banner-symbol" style="color: #e2c06a;">
+        <span class="banner-icon">🎲</span>
+        <div class="banner-label" style="color: #e2c06a;">The Die is Cast</div>
+      </div>
+    </div>
+    <div class="c-orn tl"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn tr"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn bl"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn br"><svg><use href="#corner-orn"/></svg></div>
+    <div class="card-body">
+      <div class="card-meta">
+        <div class="card-era">49–44 BC</div>
+        <div class="card-type" style="color: #e2c06a;">Civil War & Assassination</div>
+      </div>
+      <div class="card-title">Caesar Crosses the Rubicon</div>
+      <div class="card-subtitle">Alea iacta est.</div>
+      <div class="card-desc">
+        Ordered to disband his army, Julius Caesar instead led his Thirteenth Legion across the Rubicon river into Italy — an act of war against the Senate. He crushed Pompey, made himself dictator perpetuo, and was rewarded with twenty-three stab wounds in the Theatre of Pompey on the Ides of March, 44 BC. His death did not save the Republic. It ended it.
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-footer">
+        <div class="card-figures">
+          <span class="figure-tag">Caesar</span>
+          <span class="figure-tag">Brutus</span>
+          <span class="figure-tag">Pompey</span>
+        </div>
+        <div class="card-year">44 BC</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CARD 6: Attila / The Fall ── -->
+  <div class="card">
+    <div class="card-banner">
+      <div class="banner-bg" style="background: linear-gradient(160deg, #200808 0%, #380e0e 60%, #150404 100%);"></div>
+      <div class="banner-pattern"></div>
+      <div class="banner-rule-top" style="background: linear-gradient(90deg, transparent, #ff2d55, transparent);"></div>
+      <div class="banner-rule-bottom" style="background: linear-gradient(90deg, transparent, #ff2d55, transparent);"></div>
+      <div class="banner-symbol" style="color: #ff2d55;">
+        <span class="banner-icon">🔥</span>
+        <div class="banner-label" style="color: #ff2d55;">The Final Reckoning</div>
+      </div>
+    </div>
+    <div class="c-orn tl"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn tr"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn bl"><svg><use href="#corner-orn"/></svg></div>
+    <div class="c-orn br"><svg><use href="#corner-orn"/></svg></div>
+    <div class="card-body">
+      <div class="card-meta">
+        <div class="card-era">AD 434–453</div>
+        <div class="card-type" style="color: #ff2d55;">Invasion & Collapse</div>
+      </div>
+      <div class="card-title">Attila & The Scourge of God</div>
+      <div class="card-subtitle">Flagellum Dei.</div>
+      <div class="card-desc">
+        The Hunnic king Attila cut a burning path through Gaul and into Italy itself, razing Aquileia so completely that it vanished from the earth. Only the personal intervention of Pope Leo I — and a plague among Attila's own troops — turned him back. He died drunk on his wedding night in AD 453. Within twenty-three years, the Western Empire he had wounded was no more.
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-footer">
+        <div class="card-figures">
+          <span class="figure-tag">Attila</span>
+          <span class="figure-tag">Pope Leo I</span>
+          <span class="figure-tag">Aquileia</span>
+        </div>
+        <div class="card-year">AD 452</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /grid -->
+
+<!-- ══════════════════════════════ FOOTER ══════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <div class="footer-logo">ANNALES ROMANI</div>
+      <div class="footer-text">
+        These records are compiled from the works of Livy, Polybius, Suetonius, Plutarch, and Tacitus. 
+        The stones of Rome remember what men would prefer to forget. 
+        <em>Historia magistra vitae est.</em>
+      </div>
+    </div>
+    <div class="footer-right">
+      <div class="footer-quote">"Let the die be cast."</div>
+      <div class="footer-attrib">— Julius Caesar, 49 BC</div>
+    </div>
+  </div>
+  <div class="footer-ornament-bottom"></div>
+</footer>
+
+</body>
+</html>
