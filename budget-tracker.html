@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Budget Ledger</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #f5f0e8;
+      background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(0,0,0,0.04) 27px, rgba(0,0,0,0.04) 28px);
+      padding: 40px 20px;
+      font-family: 'Georgia', 'Times New Roman', serif;
+    }
+
+    .container { max-width: 780px; margin: 0 auto; }
+
+    .dateline {
+      font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+      color: #666; text-align: center; margin-bottom: 6px;
+      font-family: 'Source Serif 4', serif;
+    }
+    .masthead {
+      border-top: 4px solid #1a1a1a; border-bottom: 4px solid #1a1a1a;
+      padding: 10px 0; margin-bottom: 6px;
+    }
+    .title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(36px, 6vw, 64px); font-weight: 900;
+      text-align: center; color: #1a1a1a; line-height: 1; letter-spacing: -1px;
+    }
+    .subtitle {
+      font-family: 'Source Serif 4', serif; font-size: 12px;
+      text-align: center; color: #555; letter-spacing: 4px;
+      text-transform: uppercase; margin-top: 6px;
+    }
+    .divider { border: none; border-top: 1px solid #1a1a1a; margin: 16px 0; }
+
+    .section-label {
+      font-family: 'Playfair Display', serif; font-size: 11px; font-weight: 700;
+      letter-spacing: 4px; text-transform: uppercase; color: #1a1a1a;
+      border-bottom: 2px solid #1a1a1a; padding-bottom: 4px; margin-bottom: 14px;
+    }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+    label {
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      color: #666; font-family: 'Source Serif 4', serif;
+      display: block; margin-bottom: 4px;
+    }
+    input, select {
+      background: #fff; border: 1px solid #ccc; border-radius: 2px;
+      padding: 9px 12px; font-family: 'Source Serif 4', serif;
+      font-size: 14px; color: #1a1a1a; outline: none;
+      transition: border-color 0.15s; width: 100%;
+    }
+    input:focus, select:focus { border-color: #1a1a1a; }
+
+    .field { margin-bottom: 10px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+
+    .add-btn {
+      background: #1a1a1a; color: #f5f0e8; border: none;
+      padding: 10px 28px; font-family: 'Playfair Display', serif;
+      font-size: 14px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; cursor: pointer; transition: background 0.15s;
+      width: 100%;
+    }
+    .add-btn:hover { background: #333; }
+
+    .clear-btn {
+      background: transparent; color: #999; border: 1px solid #ccc;
+      padding: 6px 14px; font-family: 'Source Serif 4', serif;
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .clear-btn:hover { color: #c0392b; border-color: #c0392b; }
+
+    .del-btn {
+      background: none; border: none; color: #ccc; cursor: pointer;
+      font-size: 18px; padding: 0 4px; line-height: 1; transition: color 0.15s;
+    }
+    .del-btn:hover { color: #c0392b; }
+
+    .error-msg {
+      color: #c0392b; font-size: 12px; font-family: 'Source Serif 4', serif;
+      font-style: italic; margin-top: 4px; min-height: 18px;
+    }
+
+    .total-box { border: 3px double #1a1a1a; padding: 16px 20px; text-align: center; }
+    .total-label {
+      font-family: 'Source Serif 4', serif; font-size: 11px;
+      letter-spacing: 3px; text-transform: uppercase; color: #888; margin-bottom: 6px;
+    }
+    .total-amount {
+      font-family: 'Playfair Display', serif; font-size: 48px;
+      font-weight: 900; color: #1a1a1a; line-height: 1;
+    }
+    .total-count {
+      font-family: 'Source Serif 4', serif; font-size: 11px;
+      color: #888; margin-top: 6px;
+    }
+
+    .breakdown-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px dotted #ccc;
+    }
+    .breakdown-label {
+      display: flex; align-items: center; gap: 6px; min-width: 110px;
+      font-family: 'Source Serif 4', serif; font-size: 13px; color: #1a1a1a;
+    }
+    .breakdown-bar-wrap {
+      flex: 1; margin: 0 12px; height: 4px;
+      background: #e8e4dc; border-radius: 2px; overflow: hidden;
+    }
+    .breakdown-bar { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+    .breakdown-amount {
+      font-family: 'Playfair Display', serif; font-size: 14px;
+      font-weight: 700; color: #1a1a1a; min-width: 60px; text-align: right;
+    }
+
+    .log-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+
+    .empty-state {
+      border: 1px dashed #ccc; padding: 40px 20px; text-align: center;
+    }
+    .empty-title {
+      font-family: 'Playfair Display', serif; font-size: 18px;
+      color: #bbb; font-style: italic;
+    }
+    .empty-sub {
+      font-family: 'Source Serif 4', serif; font-size: 12px;
+      color: #ccc; margin-top: 6px;
+    }
+
+    .table-header {
+      display: grid; grid-template-columns: 1fr auto auto auto;
+      gap: 12px; padding: 0 0 6px 0; border-bottom: 2px solid #1a1a1a;
+    }
+    .table-header-cell {
+      font-family: 'Source Serif 4', serif; font-size: 10px;
+      letter-spacing: 2px; text-transform: uppercase; color: #888;
+    }
+
+    .expense-list { max-height: 460px; overflow-y: auto; }
+    .expense-row {
+      display: grid; grid-template-columns: 1fr auto auto auto;
+      gap: 12px; align-items: center; padding: 9px 0;
+      border-bottom: 1px solid #e8e4dc; transition: background 0.3s;
+    }
+    .expense-row.flash { animation: flash 0.6s ease forwards; }
+    @keyframes flash { 0% { background: #fffde7; } 100% { background: transparent; } }
+
+    .expense-name {
+      font-family: 'Source Serif 4', serif; font-size: 14px; color: #1a1a1a;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .cat-pill {
+      font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 2px;
+      font-family: 'Source Serif 4', serif; font-weight: 600; white-space: nowrap;
+    }
+    .expense-amount {
+      font-family: 'Playfair Display', serif; font-size: 15px;
+      font-weight: 700; color: #1a1a1a; white-space: nowrap;
+    }
+
+    .footer-note {
+      font-family: 'Source Serif 4', serif; font-size: 10px;
+      color: #aaa; text-align: center; letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Masthead -->
+  <div class="dateline" id="dateline"></div>
+  <div class="masthead"><div class="title">The Budget Ledger</div></div>
+  <div class="subtitle">Your personal expense record</div>
+  <hr class="divider">
+
+  <!-- Two columns -->
+  <div class="two-col">
+
+    <!-- LEFT -->
+    <div>
+      <div class="section-label">File an Expense</div>
+
+      <div class="field">
+        <label>Expense Name</label>
+        <input type="text" id="expName" placeholder="e.g. Dinner at Osteria…">
+      </div>
+      <div class="field-row">
+        <div>
+          <label>Amount ($)</label>
+          <input type="number" id="expAmount" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div>
+          <label>Category</label>
+          <select id="expCategory">
+            <option>Food</option>
+            <option>Transport</option>
+            <option>Entertainment</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="error-msg" id="errorMsg"></div>
+      <button class="add-btn" onclick="addExpense()">+ Add Entry</button>
+
+      <hr class="divider" style="margin-top:24px">
+
+      <!-- Total -->
+      <div class="section-label">Running Total</div>
+      <div class="total-box">
+        <div class="total-label">Total Spent</div>
+        <div class="total-amount" id="totalAmount">$0.00</div>
+        <div class="total-count" id="totalCount">0 entries recorded</div>
+      </div>
+
+      <hr class="divider" style="margin-top:20px">
+
+      <!-- Breakdown -->
+      <div class="section-label">By Category</div>
+      <div id="breakdown"></div>
+    </div>
+
+    <!-- RIGHT -->
+    <div>
+      <div class="log-header">
+        <div class="section-label" style="margin-bottom:0">Expense Log</div>
+        <button class="clear-btn" id="clearBtn" onclick="clearAll()" style="display:none">Clear All</button>
+      </div>
+      <div id="expenseLog">
+        <div class="empty-state">
+          <div class="empty-title">No entries yet.</div>
+          <div class="empty-sub">Add your first expense to begin.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <hr class="divider" style="margin-top:32px">
+  <div class="footer-note">ALL FIGURES IN USD · FOR PERSONAL USE ONLY</div>
+</div>
+
+<script>
+  const CATEGORIES = ["Food", "Transport", "Entertainment", "Other"];
+  const CAT_META = {
+    Food:          { color: "#b85c38", bg: "#fdf0eb", symbol: "◆" },
+    Transport:     { color: "#2e5fa3", bg: "#ebf0fd", symbol: "▲" },
+    Entertainment: { color: "#6b3fa0", bg: "#f3ebfd", symbol: "★" },
+    Other:         { color: "#4a7c59", bg: "#ebfdf0", symbol: "●" },
+  };
+
+  let expenses = [];
+
+  // Set dateline
+  document.getElementById("dateline").textContent =
+    "Personal Finance — " + new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Enter key support
+  document.getElementById("expName").addEventListener("keydown", e => { if (e.key === "Enter") addExpense(); });
+  document.getElementById("expAmount").addEventListener("keydown", e => { if (e.key === "Enter") addExpense(); });
+
+  function addExpense() {
+    const nameEl = document.getElementById("expName");
+    const amountEl = document.getElementById("expAmount");
+    const categoryEl = document.getElementById("expCategory");
+    const errorEl = document.getElementById("errorMsg");
+
+    const name = nameEl.value.trim();
+    const amt = parseFloat(amountEl.value);
+    const category = categoryEl.value;
+
+    if (!name) { errorEl.textContent = "⚠ Please enter an expense name."; return; }
+    if (isNaN(amt) || amt <= 0) { errorEl.textContent = "⚠ Please enter a valid amount."; return; }
+    errorEl.textContent = "";
+
+    const id = Date.now();
+    expenses.unshift({ id, name, amount: amt, category });
+
+    nameEl.value = "";
+    amountEl.value = "";
+
+    render(id);
+  }
+
+  function deleteExpense(id) {
+    expenses = expenses.filter(e => e.id !== id);
+    render(null);
+  }
+
+  function clearAll() {
+    if (confirm("Clear all expenses?")) {
+      expenses = [];
+      render(null);
+    }
+  }
+
+  function render(newId) {
+    const total = expenses.reduce((s, e) => s + e.amount, 0);
+
+    // Total
+    document.getElementById("totalAmount").textContent = "$" + total.toFixed(2);
+    const count = expenses.length;
+    document.getElementById("totalCount").textContent = count + " " + (count === 1 ? "entry" : "entries") + " recorded";
+
+    // Clear button
+    document.getElementById("clearBtn").style.display = expenses.length > 0 ? "inline-block" : "none";
+
+    // Breakdown
+    const breakdownEl = document.getElementById("breakdown");
+    breakdownEl.innerHTML = CATEGORIES.map(cat => {
+      const sum = expenses.filter(e => e.category === cat).reduce((s, e) => s + e.amount, 0);
+      const pct = total > 0 ? (sum / total) * 100 : 0;
+      const meta = CAT_META[cat];
+      return `
+        <div class="breakdown-item">
+          <div class="breakdown-label">
+            <span style="color:${meta.color};font-size:10px">${meta.symbol}</span>
+            <span>${cat}</span>
+          </div>
+          <div class="breakdown-bar-wrap">
+            <div class="breakdown-bar" style="width:${pct}%;background:${meta.color}"></div>
+          </div>
+          <div class="breakdown-amount">$${sum.toFixed(2)}</div>
+        </div>`;
+    }).join("");
+
+    // Expense log
+    const logEl = document.getElementById("expenseLog");
+    if (expenses.length === 0) {
+      logEl.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-title">No entries yet.</div>
+          <div class="empty-sub">Add your first expense to begin.</div>
+        </div>`;
+    } else {
+      const header = `
+        <div class="table-header">
+          <div class="table-header-cell">Description</div>
+          <div class="table-header-cell">Category</div>
+          <div class="table-header-cell">Amount</div>
+          <div class="table-header-cell"></div>
+        </div>`;
+      const rows = expenses.map(e => {
+        const meta = CAT_META[e.category];
+        return `
+          <div class="expense-row${e.id === newId ? ' flash' : ''}" id="row-${e.id}">
+            <div class="expense-name">${escHtml(e.name)}</div>
+            <div class="cat-pill" style="color:${meta.color};background:${meta.bg}">${e.category}</div>
+            <div class="expense-amount">$${e.amount.toFixed(2)}</div>
+            <button class="del-btn" onclick="deleteExpense(${e.id})" title="Remove">×</button>
+          </div>`;
+      }).join("");
+      logEl.innerHTML = header + `<div class="expense-list">${rows}</div>`;
+    }
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  render(null);
+</script>
+</body>
+</html>
