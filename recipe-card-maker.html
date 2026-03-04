@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recipe Card Maker</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #faf6f0;
+    --warm-white: #fffef9;
+    --terracotta: #c4583a;
+    --terracotta-light: #e07055;
+    --terracotta-pale: #f5e8e4;
+    --forest: #3a5a40;
+    --forest-light: #4e7a56;
+    --ink: #1e1a16;
+    --stone: #8a7e74;
+    --stone-light: #c4bdb6;
+    --rule: #e8ddd5;
+  }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--cream);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: var(--ink);
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  header .logo-icon {
+    width: 34px; height: 34px;
+    background: var(--terracotta);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--cream);
+    font-size: 1.45rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  header span {
+    color: var(--terracotta-light);
+    font-family: 'Lato', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-left: 6px;
+    opacity: 0.85;
+  }
+
+  .workspace {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ── LEFT PANEL ── */
+  .form-panel {
+    background: var(--warm-white);
+    border-right: 1px solid var(--rule);
+    padding: 36px 32px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  .form-section-title {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--stone);
+    margin-bottom: -10px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  textarea,
+  select {
+    width: 100%;
+    background: var(--cream);
+    border: 1.5px solid var(--rule);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  textarea:focus {
+    border-color: var(--terracotta);
+    box-shadow: 0 0 0 3px rgba(196,88,58,0.1);
+  }
+
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  textarea {
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .hint {
+    font-size: 0.74rem;
+    color: var(--stone);
+    margin-top: 5px;
+    line-height: 1.5;
+  }
+
+  .btn-generate {
+    background: var(--terracotta);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 28px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 4px 14px rgba(196,88,58,0.28);
+    width: 100%;
+  }
+  .btn-generate:hover {
+    background: var(--terracotta-light);
+    box-shadow: 0 6px 20px rgba(196,88,58,0.36);
+  }
+  .btn-generate:active { transform: scale(0.98); }
+
+  /* ── RIGHT PANEL ── */
+  .preview-panel {
+    background: #ede8e0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 32px;
+    overflow-y: auto;
+  }
+
+  .preview-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    align-self: flex-end;
+  }
+  .btn-print {
+    background: var(--forest);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 9px 20px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    transition: background 0.2s;
+  }
+  .btn-print:hover { background: var(--forest-light); }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    height: 100%;
+    min-height: 400px;
+    opacity: 0.45;
+    text-align: center;
+  }
+  .empty-state .big-icon { font-size: 56px; }
+  .empty-state p {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--ink);
+    font-style: italic;
+  }
+
+  /* ── RECIPE CARD ── */
+  .recipe-card {
+    background: var(--warm-white);
+    width: 100%;
+    max-width: 620px;
+    border-radius: 4px;
+    box-shadow: 0 8px 40px rgba(30,26,22,0.18), 0 2px 8px rgba(30,26,22,0.08);
+    overflow: hidden;
+    animation: cardIn 0.45s cubic-bezier(0.22,1,0.36,1);
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(22px) scale(0.98); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .card-header {
+    background: var(--ink);
+    padding: 36px 44px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(196,88,58,0.15);
+  }
+  .card-header::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: 30px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(74,122,86,0.12);
+  }
+  .card-category {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--terracotta-light);
+    margin-bottom: 10px;
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1.2;
+    position: relative; z-index: 1;
+  }
+
+  .card-meta {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .meta-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 18px 10px;
+    border-right: 1px solid var(--rule);
+    text-align: center;
+    gap: 4px;
+  }
+  .meta-item:last-child { border-right: none; }
+  .meta-icon { font-size: 1.2rem; }
+  .meta-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--stone);
+  }
+  .meta-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .card-body {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+  }
+
+  .card-ingredients {
+    background: var(--terracotta-pale);
+    padding: 28px 24px;
+    border-right: 1px solid var(--rule);
+  }
+  .section-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-heading::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--stone-light);
+  }
+
+  .ingredient-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .ingredient-list li {
+    font-size: 0.85rem;
+    color: var(--ink);
+    line-height: 1.45;
+    padding-left: 14px;
+    position: relative;
+  }
+  .ingredient-list li::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    color: var(--terracotta);
+    font-weight: 700;
+    font-size: 1.1rem;
+    line-height: 1.2;
+  }
+
+  .card-instructions {
+    padding: 28px 28px 32px;
+  }
+  .steps-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .steps-list li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 26px; height: 26px;
+    background: var(--ink);
+    color: var(--cream);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-top: 1px;
+  }
+  .step-text {
+    font-size: 0.87rem;
+    color: var(--ink);
+    line-height: 1.65;
+    padding-top: 3px;
+  }
+
+  .card-footer {
+    background: var(--ink);
+    padding: 14px 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-footer .footer-brand {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--stone-light);
+  }
+  .card-footer .footer-divider {
+    width: 40px; height: 1px;
+    background: var(--terracotta);
+    opacity: 0.6;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    header, .form-panel, .preview-actions { display: none !important; }
+    body { background: white; }
+    .workspace { display: block; }
+    .preview-panel {
+      padding: 0;
+      background: white;
+      display: block;
+    }
+    .recipe-card {
+      box-shadow: none;
+      max-width: 100%;
+      border: 1px solid #ddd;
+    }
+    .card-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .card-ingredients { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .card-footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  @media (max-width: 900px) {
+    .workspace { grid-template-columns: 1fr; }
+    .preview-panel { padding: 30px 16px; }
+    .card-body { grid-template-columns: 1fr; }
+    .card-ingredients { border-right: none; border-bottom: 1px solid var(--rule); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">🍴</div>
+  <h1>Recipe Card Maker <span>— by hand &amp; heart</span></h1>
+</header>
+
+<div class="workspace">
+
+  <!-- FORM -->
+  <div class="form-panel">
+
+    <div>
+      <div class="form-section-title">The Basics</div>
+    </div>
+
+    <div>
+      <label for="recipeName">Recipe Name</label>
+      <input type="text" id="recipeName" placeholder="e.g. Grandma's Lemon Tart">
+    </div>
+
+    <div class="row-2">
+      <div>
+        <label for="servings">Servings</label>
+        <input type="text" id="servings" placeholder="e.g. 4 people">
+      </div>
+      <div>
+        <label for="prepTime">Prep Time</label>
+        <input type="text" id="prepTime" placeholder="e.g. 20 min">
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div>
+        <label for="cookTime">Cook Time</label>
+        <input type="text" id="cookTime" placeholder="e.g. 35 min">
+      </div>
+      <div>
+        <label for="difficulty">Difficulty</label>
+        <input type="text" id="difficulty" placeholder="e.g. Easy">
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--rule); padding-top: 6px;">
+      <div class="form-section-title" style="margin-bottom:16px;">Ingredients</div>
+      <label for="ingredients">One per line</label>
+      <textarea id="ingredients" rows="8" placeholder="2 cups all-purpose flour&#10;1 tsp baking powder&#10;3 large eggs&#10;1 cup whole milk&#10;..."></textarea>
+      <p class="hint">Add quantity + unit before each ingredient name.</p>
+    </div>
+
+    <div>
+      <div class="form-section-title" style="margin-bottom:16px;">Instructions</div>
+      <label for="instructions">One step per line</label>
+      <textarea id="instructions" rows="10" placeholder="Preheat oven to 375°F and grease a 9-inch pan.&#10;Whisk together flour, baking powder, and salt in a large bowl.&#10;In another bowl, beat eggs and milk until combined.&#10;..."></textarea>
+      <p class="hint">Each line becomes a numbered step on your card.</p>
+    </div>
+
+    <button class="btn-generate" onclick="generateCard()">✦ Generate Recipe Card</button>
+
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="preview-panel" id="previewPanel">
+    <div class="empty-state" id="emptyState">
+      <div class="big-icon">🥘</div>
+      <p>Fill in your recipe details<br>and click Generate Card</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function generateCard() {
+  const name = document.getElementById('recipeName').value.trim() || 'Untitled Recipe';
+  const servings = document.getElementById('servings').value.trim() || '—';
+  const prepTime = document.getElementById('prepTime').value.trim() || '—';
+  const cookTime = document.getElementById('cookTime').value.trim() || '—';
+  const difficulty = document.getElementById('difficulty').value.trim() || '—';
+  const ingredientsRaw = document.getElementById('ingredients').value.trim();
+  const instructionsRaw = document.getElementById('instructions').value.trim();
+
+  const ingredients = ingredientsRaw
+    ? ingredientsRaw.split('\n').map(l => l.trim()).filter(Boolean)
+    : ['No ingredients listed'];
+
+  const steps = instructionsRaw
+    ? instructionsRaw.split('\n').map(l => l.trim()).filter(Boolean)
+    : ['No instructions listed'];
+
+  const ingredientItems = ingredients.map(i => `<li>${escHtml(i)}</li>`).join('');
+  const stepItems = steps.map((s, i) => `
+    <li>
+      <div class="step-num">${i + 1}</div>
+      <span class="step-text">${escHtml(s)}</span>
+    </li>`).join('');
+
+  const panel = document.getElementById('previewPanel');
+  panel.innerHTML = `
+    <div class="preview-actions">
+      <button class="btn-print" onclick="window.print()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print Card
+      </button>
+    </div>
+    <div class="recipe-card">
+      <div class="card-header">
+        <div class="card-category">Recipe Card</div>
+        <div class="card-title">${escHtml(name)}</div>
+      </div>
+
+      <div class="card-meta">
+        <div class="meta-item">
+          <span class="meta-icon">👥</span>
+          <span class="meta-label">Serves</span>
+          <span class="meta-value">${escHtml(servings)}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">⏱</span>
+          <span class="meta-label">Prep</span>
+          <span class="meta-value">${escHtml(prepTime)}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">🔥</span>
+          <span class="meta-label">Cook</span>
+          <span class="meta-value">${escHtml(cookTime)}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">📊</span>
+          <span class="meta-label">Level</span>
+          <span class="meta-value">${escHtml(difficulty)}</span>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="card-ingredients">
+          <div class="section-heading">Ingredients</div>
+          <ul class="ingredient-list">${ingredientItems}</ul>
+        </div>
+        <div class="card-instructions">
+          <div class="section-heading">Method</div>
+          <ol class="steps-list">${stepItems}</ol>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <span class="footer-brand">Made with love</span>
+        <div class="footer-divider"></div>
+        <span class="footer-brand">${escHtml(name)}</span>
+      </div>
+    </div>
+  `;
+}
+
+function escHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>
