@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lynchpin Analytics — Equity Research</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; }
+  /* API Key Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(13,13,13,0.85);
+    display: flex; align-items: center; justify-content: center; z-index: 9999;
+  }
+  .modal-box {
+    background: #fff; border: 2px solid #0d0d0d; padding: 48px;
+    max-width: 520px; width: 90%; box-shadow: 8px 8px 0 #0d0d0d;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useRef, useEffect, useCallback } = React;
+
+const BLUE="#0062cc",GREEN="#046a38",GOLD="#b8972a",RED="#8b1a1a",TEAL="#1a5f5f",MUTED="#6b7280",RULE="#dde1e7",CREAM="#f4f6f8",INK="#0d0d0d";
+
+const TICKERS=[
+  {s:"AAPL",n:"Apple Inc.",x:"NASDAQ"},{s:"MSFT",n:"Microsoft Corporation",x:"NASDAQ"},
+  {s:"NVDA",n:"NVIDIA Corporation",x:"NASDAQ"},{s:"AMZN",n:"Amazon.com Inc.",x:"NASDAQ"},
+  {s:"GOOGL",n:"Alphabet Inc. Class A",x:"NASDAQ"},{s:"META",n:"Meta Platforms Inc.",x:"NASDAQ"},
+  {s:"TSLA",n:"Tesla Inc.",x:"NASDAQ"},{s:"AVGO",n:"Broadcom Inc.",x:"NASDAQ"},
+  {s:"ORCL",n:"Oracle Corporation",x:"NYSE"},{s:"CRM",n:"Salesforce Inc.",x:"NYSE"},
+  {s:"AMD",n:"Advanced Micro Devices Inc.",x:"NASDAQ"},{s:"INTC",n:"Intel Corporation",x:"NASDAQ"},
+  {s:"QCOM",n:"Qualcomm Inc.",x:"NASDAQ"},{s:"ADBE",n:"Adobe Inc.",x:"NASDAQ"},
+  {s:"NOW",n:"ServiceNow Inc.",x:"NYSE"},{s:"INTU",n:"Intuit Inc.",x:"NASDAQ"},
+  {s:"PANW",n:"Palo Alto Networks Inc.",x:"NASDAQ"},{s:"CRWD",n:"CrowdStrike Holdings Inc.",x:"NASDAQ"},
+  {s:"NFLX",n:"Netflix Inc.",x:"NASDAQ"},{s:"UBER",n:"Uber Technologies Inc.",x:"NYSE"},
+  {s:"ABNB",n:"Airbnb Inc.",x:"NASDAQ"},{s:"COIN",n:"Coinbase Global Inc.",x:"NASDAQ"},
+  {s:"PLTR",n:"Palantir Technologies Inc.",x:"NASDAQ"},{s:"PYPL",n:"PayPal Holdings Inc.",x:"NASDAQ"},
+  {s:"SHOP",n:"Shopify Inc.",x:"NYSE"},{s:"SNOW",n:"Snowflake Inc.",x:"NYSE"},
+  {s:"DDOG",n:"Datadog Inc.",x:"NASDAQ"},{s:"NET",n:"Cloudflare Inc.",x:"NYSE"},
+  {s:"JPM",n:"JPMorgan Chase & Co.",x:"NYSE"},{s:"BAC",n:"Bank of America Corp.",x:"NYSE"},
+  {s:"WFC",n:"Wells Fargo & Company",x:"NYSE"},{s:"GS",n:"Goldman Sachs Group Inc.",x:"NYSE"},
+  {s:"MS",n:"Morgan Stanley",x:"NYSE"},{s:"COF",n:"Capital One Financial Corp.",x:"NYSE"},
+  {s:"AXP",n:"American Express Company",x:"NYSE"},{s:"V",n:"Visa Inc.",x:"NYSE"},
+  {s:"MA",n:"Mastercard Inc.",x:"NYSE"},{s:"BLK",n:"BlackRock Inc.",x:"NYSE"},
+  {s:"SCHW",n:"Charles Schwab Corporation",x:"NYSE"},{s:"SPGI",n:"S&P Global Inc.",x:"NYSE"},
+  {s:"UNH",n:"UnitedHealth Group Inc.",x:"NYSE"},{s:"JNJ",n:"Johnson & Johnson",x:"NYSE"},
+  {s:"LLY",n:"Eli Lilly and Company",x:"NYSE"},{s:"ABBV",n:"AbbVie Inc.",x:"NYSE"},
+  {s:"MRK",n:"Merck & Co. Inc.",x:"NYSE"},{s:"PFE",n:"Pfizer Inc.",x:"NYSE"},
+  {s:"AMGN",n:"Amgen Inc.",x:"NASDAQ"},{s:"GILD",n:"Gilead Sciences Inc.",x:"NASDAQ"},
+  {s:"ISRG",n:"Intuitive Surgical Inc.",x:"NASDAQ"},{s:"MRNA",n:"Moderna Inc.",x:"NASDAQ"},
+  {s:"WMT",n:"Walmart Inc.",x:"NYSE"},{s:"COST",n:"Costco Wholesale Corp.",x:"NASDAQ"},
+  {s:"HD",n:"The Home Depot Inc.",x:"NYSE"},{s:"TGT",n:"Target Corporation",x:"NYSE"},
+  {s:"MCD",n:"McDonald's Corporation",x:"NYSE"},{s:"SBUX",n:"Starbucks Corporation",x:"NASDAQ"},
+  {s:"NKE",n:"Nike Inc.",x:"NYSE"},{s:"KO",n:"The Coca-Cola Company",x:"NYSE"},
+  {s:"PEP",n:"PepsiCo Inc.",x:"NASDAQ"},{s:"PG",n:"Procter & Gamble Co.",x:"NYSE"},
+  {s:"XOM",n:"Exxon Mobil Corporation",x:"NYSE"},{s:"CVX",n:"Chevron Corporation",x:"NYSE"},
+  {s:"CAT",n:"Caterpillar Inc.",x:"NYSE"},{s:"DE",n:"Deere & Company",x:"NYSE"},
+  {s:"GE",n:"GE Aerospace",x:"NYSE"},{s:"HON",n:"Honeywell International Inc.",x:"NASDAQ"},
+  {s:"BA",n:"The Boeing Company",x:"NYSE"},{s:"LMT",n:"Lockheed Martin Corp.",x:"NYSE"},
+  {s:"RTX",n:"RTX Corporation",x:"NYSE"},{s:"UPS",n:"United Parcel Service Inc.",x:"NYSE"},
+  {s:"VZ",n:"Verizon Communications Inc.",x:"NYSE"},{s:"T",n:"AT&T Inc.",x:"NYSE"},
+  {s:"TMUS",n:"T-Mobile US Inc.",x:"NASDAQ"},{s:"DIS",n:"The Walt Disney Company",x:"NYSE"},
+  {s:"F",n:"Ford Motor Company",x:"NYSE"},{s:"GM",n:"General Motors Company",x:"NYSE"},
+  {s:"SPY",n:"SPDR S&P 500 ETF Trust",x:"ETF"},{s:"QQQ",n:"Invesco QQQ Trust",x:"ETF"},
+  {s:"VOO",n:"Vanguard S&P 500 ETF",x:"ETF"},{s:"IWM",n:"iShares Russell 2000 ETF",x:"ETF"},
+  {s:"GLD",n:"SPDR Gold Shares",x:"ETF"},{s:"SOXX",n:"iShares Semiconductor ETF",x:"ETF"},
+  {s:"ARKK",n:"ARK Innovation ETF",x:"ETF"},{s:"BRK.B",n:"Berkshire Hathaway Class B",x:"NYSE"},
+  {s:"DELL",n:"Dell Technologies Inc.",x:"NYSE"},{s:"ARM",n:"Arm Holdings plc",x:"NASDAQ"},
+];
+
+function searchTickers(q) {
+  if (!q) return [];
+  const uq = q.toUpperCase().trim();
+  return TICKERS.map(t => {
+    const sym=t.s.toUpperCase(), name=t.n.toUpperCase();
+    let score=0;
+    if(sym===uq) score=100;
+    else if(sym.startsWith(uq)) score=80-sym.length;
+    else if(name.startsWith(uq)) score=50;
+    else if(name.includes(" "+uq)) score=40;
+    else if(name.includes(uq)) score=30;
+    return {...t,score};
+  }).filter(t=>t.score>0).sort((a,b)=>b.score-a.score).slice(0,8);
+}
+
+const SYSTEM_PROMPT=`You are a senior equity research analyst. Generate a comprehensive stock research report as a single valid JSON object. No preamble, no markdown fences. Start with { and end with }.
+
+JSON structure:
+{
+  "ticker":"SYMBOL","companyName":"Full Company Name","exchange":"NYSE/NASDAQ",
+  "currentPrice":"$XXX.XX","marketCap":"$XXXb","sector":"Sector","industry":"Industry",
+  "oneYearReturn":"+/-XX.X%","reportDate":"Month DD, YYYY",
+  "fundamentals":{
+    "headline":"2-3 sentence valuation overview",
+    "trailingPE":"XX.X","forwardPE":"XX.X","industryAvgPE":"XX.X",
+    "sixMonthAvgPE":"XX.X","oneYearAvgPE":"XX.X","fiveYearAvgPE":"XX.X",
+    "eps":"$X.XX","revenueGrowthYoY":"+/-XX.X%","grossMargin":"XX.X%",
+    "commentary":"2-3 sentence analyst commentary"
+  },
+  "technicals":{
+    "headline":"1-2 sentence technical overview",
+    "indicators":[
+      {"name":"RSI (14)","value":"XX.X","signal":"Bullish|Bearish|Neutral","laymanExplanation":"plain english","analystNote":"note"},
+      {"name":"MACD","value":"X.XX","signal":"Bullish|Bearish|Neutral","laymanExplanation":"plain english","analystNote":"note"},
+      {"name":"50/200-Day MA","value":"$XXX / $XXX","signal":"Bullish|Bearish|Neutral","laymanExplanation":"plain english","analystNote":"note"},
+      {"name":"Bollinger Bands","value":"$XXX-$XXX","signal":"Bullish|Bearish|Neutral","laymanExplanation":"plain english","analystNote":"note"},
+      {"name":"Volume (Avg 30d)","value":"XXM","signal":"Bullish|Bearish|Neutral","laymanExplanation":"plain english","analystNote":"note"}
+    ]
+  },
+  "earningsSummary":{
+    "headline":"1-2 sentence overview",
+    "earningsCall":{"date":"QX YYYY","keyPoints":["p1","p2","p3","p4"]},
+    "tenQ":{"period":"QX YYYY","keyPoints":["p1","p2","p3"]},
+    "annualReport":{"year":"YYYY","keyPoints":["p1","p2","p3"]}
+  },
+  "management":[
+    {"name":"Full Name","title":"Title","tenureNote":"Since YYYY","bio":"2 sentence bio"},
+    {"name":"Full Name","title":"Title","tenureNote":"Since YYYY","bio":"2 sentence bio"},
+    {"name":"Full Name","title":"Title","tenureNote":"Since YYYY","bio":"2 sentence bio"},
+    {"name":"Full Name","title":"Title","tenureNote":"Since YYYY","bio":"2 sentence bio"}
+  ],
+  "analystRatings":{
+    "buyCount":0,"holdCount":0,"sellCount":0,
+    "avgPriceTarget":"$XXX","updownside":"+/-XX.X%",
+    "ratings":[
+      {"firm":"Firm","analyst":"Name","rating":"Buy|Hold|Sell|Overweight|Neutral","priceTarget":"$XXX","note":"thesis"},
+      {"firm":"Firm","analyst":"Name","rating":"Buy|Hold|Sell|Overweight|Neutral","priceTarget":"$XXX","note":"thesis"},
+      {"firm":"Firm","analyst":"Name","rating":"Buy|Hold|Sell|Overweight|Neutral","priceTarget":"$XXX","note":"thesis"},
+      {"firm":"Firm","analyst":"Name","rating":"Buy|Hold|Sell|Overweight|Neutral","priceTarget":"$XXX","note":"thesis"},
+      {"firm":"Firm","analyst":"Name","rating":"Buy|Hold|Sell|Overweight|Neutral","priceTarget":"$XXX","note":"thesis"}
+    ]
+  }
+}`;
+
+function parseReport(raw) {
+  let text=raw.trim().replace(/```json\s*/gi,"").replace(/```\s*/gi,"").trim();
+  try{return JSON.parse(text);}catch(_){}
+  const first=text.indexOf("{"),last=text.lastIndexOf("}");
+  if(first!==-1&&last>first){try{return JSON.parse(text.slice(first,last+1));}catch(_){}}
+  throw new Error("Could not parse report JSON. Please try again.");
+}
+
+function Badge({children,color,bg,border}){
+  return <span style={{fontFamily:"DM Mono,monospace",fontSize:9,letterSpacing:2,textTransform:"uppercase",padding:"2px 8px",color,background:bg,border:`1px solid ${border}`,display:"inline-block"}}>{children}</span>;
+}
+function SectionHeading({children}){
+  return <div style={{fontFamily:"DM Mono,monospace",fontSize:9,letterSpacing:4,textTransform:"uppercase",color:GOLD,borderBottom:`1px solid ${RULE}`,paddingBottom:6,marginBottom:20,marginTop:32}}>{children}</div>;
+}
+function MetricCell({label,value,sub,valueColor}){
+  return <div style={{background:"white",padding:"16px 20px",textAlign:"center"}}>
+    <div style={{fontFamily:"DM Mono,monospace",fontSize:8,letterSpacing:2,textTransform:"uppercase",color:MUTED,marginBottom:6}}>{label}</div>
+    <div style={{fontFamily:"Playfair Display,serif",fontSize:22,fontWeight:600,color:valueColor||INK}}>{value}</div>
+    {sub&&<div style={{fontSize:10,color:MUTED,marginTop:3}}>{sub}</div>}
+  </div>;
+}
+function IndicatorCard({ind}){
+  const sc=ind.signal==="Bullish"?TEAL:ind.signal==="Bearish"?RED:MUTED;
+  const sb=ind.signal==="Bullish"?"rgba(26,95,95,0.10)":ind.signal==="Bearish"?"rgba(139,26,26,0.08)":"rgba(107,99,85,0.08)";
+  return <div style={{border:`1px solid ${RULE}`,display:"grid",gridTemplateColumns:"140px 1fr",overflow:"hidden"}}>
+    <div style={{background:CREAM,padding:20,borderRight:`1px solid ${RULE}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",gap:6}}>
+      <div style={{fontFamily:"Playfair Display,serif",fontSize:14,fontWeight:600,color:INK}}>{ind.name}</div>
+      <div style={{fontFamily:"DM Mono,monospace",fontSize:12,fontWeight:500,color:sc}}>{ind.value}</div>
+      <Badge color={sc} bg={sb} border={sc}>{ind.signal}</Badge>
+    </div>
+    <div style={{padding:"20px 24px"}}>
+      <p style={{fontSize:13,lineHeight:1.7,color:"#2a2420",marginBottom:10}}><strong>In Plain English:</strong> {ind.laymanExplanation}</p>
+      <p style={{fontSize:13,lineHeight:1.7,color:"#2a2420",margin:0}}><strong>Analyst Note:</strong> {ind.analystNote}</p>
+    </div>
+  </div>;
+}
+function MgmtCard({m}){
+  const ini=(m.name||"").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+  return <div style={{border:`1px solid ${RULE}`,overflow:"hidden"}}>
+    <div style={{background:CREAM,height:100,borderBottom:`1px solid ${RULE}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Playfair Display,serif",fontSize:36,color:RULE}}>{ini}</div>
+    <div style={{padding:"14px 16px"}}>
+      <div style={{fontFamily:"Playfair Display,serif",fontSize:14,fontWeight:600,color:INK,marginBottom:3}}>{m.name}</div>
+      <div style={{fontFamily:"DM Mono,monospace",fontSize:9,letterSpacing:1.5,textTransform:"uppercase",color:GOLD,marginBottom:6}}>{m.title}</div>
+      <div style={{fontFamily:"DM Mono,monospace",fontSize:9,color:MUTED,marginBottom:8}}>{m.tenureNote}</div>
+      <div style={{fontSize:12,lineHeight:1.55,color:MUTED}}>{m.bio}</div>
+    </div>
+  </div>;
+}
+function ratingStyle(r=""){
+  const rl=r.toLowerCase();
+  if(rl.includes("buy")||rl.includes("overweight")||rl.includes("outperform")) return{color:TEAL,border:TEAL,bg:"rgba(26,95,95,0.07)"};
+  if(rl.includes("sell")||rl.includes("underweight")||rl.includes("underperform")) return{color:RED,border:RED,bg:"rgba(139,26,26,0.07)"};
+  return{color:GOLD,border:GOLD,bg:"rgba(184,151,42,0.07)"};
+}
+function Page({num,title,sub,children}){
+  return <div style={{border:`2px solid ${INK}`,borderTop:"none",background:"white",marginBottom:2}}>
+    <div style={{background:CREAM,borderBottom:`2px solid ${INK}`,padding:"16px 40px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+      <span style={{fontFamily:"DM Mono,monospace",fontSize:9,letterSpacing:3,color:MUTED,textTransform:"uppercase"}}>Page {num} of 03</span>
+      <span style={{fontFamily:"Playfair Display,serif",fontSize:15,fontWeight:600,color:INK,fontStyle:"italic"}}>{title}</span>
+      <span style={{fontFamily:"DM Mono,monospace",fontSize:9,letterSpacing:3,color:MUTED,textTransform:"uppercase"}}>{sub}</span>
+    </div>
+    <div style={{padding:40}}>{children}</div>
+  </div>;
+}
+function EarningsCard({title,points=[],full}){
+  return <div style={{gridColumn:full?"1 / -1":undefined,border:`1px solid ${RULE}`,padding:"20px 24px"}}>
+    <div style={{fontFamily:"Playfair Display,serif",fontSize:14,fontWeight:600,fontStyle:"italic",color:INK,marginBottom:12,paddingBottom:10,borderBottom:`1px solid ${RULE}`}}>{title}</div>
+    <ul style={{listStyle:"none",padding:0,margin:0}}>
+      {points.map((p,i)=><li key={i} style={{fontSize:13,color:"#2a2420",lineHeight:1.6,padding:"5px 0 5px 16px",position:"relative",borderBottom:i<points.length-1?"1px solid rgba(200,191,168,0.3)":"none"}}>
+        <span style={{position:"absolute",left:0,color:GOLD,fontSize:11,top:6}}>—</span>{p}
+      </li>)}
+    </ul>
+  </div>;
+}
+
+const STEPS=["Fetching real-time market data","Analyzing fundamental metrics & P/E ratios","Computing technical indicators","Reviewing earnings call transcripts","Researching management profiles","Aggregating analyst ratings","Composing report"];
+
+// ── API KEY MODAL ──
+function ApiKeyModal({onSubmit}){
+  const [key,setKey]=useState("");
+  const [err,setErr]=useState("");
+  function submit(){
+    const k=key.trim();
+    if(!k.startsWith("sk-ant-")){setErr("Key should start with sk-ant-"); return;}
+    onSubmit(k);
+  }
+  return <div className="modal-overlay">
+    <div className="modal-box">
+      <div style={{borderTop:`1px solid ${INK}`,marginBottom:20}}/>
+      <div style={{fontFamily:"Playfair Display,serif",fontSize:36,fontWeight:700,marginBottom:6}}>
+        <span style={{color:BLUE}}>Lynchpin</span> <span style={{color:GREEN}}>Analytics</span>
+      </div>
+      <div style={{fontFamily:"DM Mono,monospace",fontSize:9,letterSpacing:3,textTransform:"uppercase",color:MUTED,marginBottom:32}}>Institutional-Grade Equity Research · Powered by AI</div>
+      <div style={{fontFamily:"DM Mono,monospace",fontSize:10,letterSpacing:2,textTransform:"uppercase",color:MUTED,marginBottom:10}}>Anthropic API Key</div>
+      <input
+        type="password"
+        value={key}
+        onChange={e=>setKey(e.target.value)}
+        onKeyDown={e=>e.key==="Enter"&&submit()}
+        placeholder="sk-ant-api03-..."
+        style={{width:"100%",padding:"14px 16px",fontFamily:"DM Mono,monospace",fontSize:13,border:`2px solid ${INK}`,outline:"none",marginBottom:8}}
+      />
+      {err&&<div style={{color:RED,fontFamily:"DM Mono,monospace",fontSize:11,marginBottom:8}}>{err}</div>}
+      <div style={{fontSize:12,color:MUTED,lineHeight:1.6,marginBottom:24}}>
+        Your API key is used only in your browser and never stored or transmitted anywhere except directly to Anthropic's API. Get a key at <a href="https://console.anthropic.com" target="_blank" style={{color:BLUE}}>console.anthropic.com</a>.
+      </div>
+      <button onClick={submit} style={{width:"100%",padding:"16px",background:BLUE,color:"#fff",border:"none",cursor:"pointer",fontFamily:"DM Mono,monospace",fontSize:11,letterSpacing:2,textTransform:"uppercase"}}>
+        Enter Lynchpin Analytics →
+      </button>
+    </div>
+  </div>;
+}
+
+// ── MAIN APP ──
+function App(){
+  const [apiKey,setApiKey]=useState(null);
+  const [query,setQuery]=useState("");
+  const [suggestions,setSuggestions]=useState([]);
+  const [showDrop,setShowDrop]=useState(false);
+  const [hiIdx,setHiIdx]=useState(-1);
+  const [loading,setLoading]=useState(false);
+  const [step,setStep]=useState(0);
+  const [report,setReport]=useState(null);
+  const [error,setError]=useState(null);
+  const inputRef=useRef(null);
+  const dropRef=useRef(null);
+  const stepTimer=useRef(null);
+
+  const handleInput=useCallback((val)=>{
+    setQuery(val);
+    const q=val.trim().toUpperCase();
+    if(!q){setSuggestions([]);setShowDrop(false);return;}
+    const results=searchTickers(q);
+    setSuggestions(results);
+    setShowDrop(results.length>0);
+    setHiIdx(-1);
+  },[]);
+
+  const handleSelect=useCallback((sym)=>{
+    setQuery(sym);
+    setShowDrop(false);
+    setSuggestions([]);
+    generate(sym);
+  },[apiKey]);
+
+  useEffect(()=>{
+    const handler=(e)=>{
+      if(dropRef.current&&!dropRef.current.contains(e.target)&&inputRef.current&&!inputRef.current.contains(e.target)){
+        setShowDrop(false);
+      }
+    };
+    document.addEventListener("mousedown",handler);
+    return()=>document.removeEventListener("mousedown",handler);
+  },[]);
+
+  const handleKeyDown=(e)=>{
+    if(!showDrop||suggestions.length===0){if(e.key==="Enter")generate();return;}
+    if(e.key==="ArrowDown"){e.preventDefault();setHiIdx(i=>Math.min(i+1,suggestions.length-1));}
+    else if(e.key==="ArrowUp"){e.preventDefault();setHiIdx(i=>Math.max(i-1,0));}
+    else if(e.key==="Escape"){setShowDrop(false);}
+    else if(e.key==="Enter"){e.preventDefault();if(hiIdx>=0)handleSelect(suggestions[hiIdx].s);else generate();}
+  };
+
+  async function generate(sym){
+    const ticker=(sym||query).trim().toUpperCase();
+    if(!ticker)return;
+    setQuery(ticker);setShowDrop(false);setError(null);setReport(null);setLoading(true);setStep(0);
+    clearInterval(stepTimer.current);
+    stepTimer.current=setInterval(()=>setStep(s=>Math.min(s+1,6)),1800);
+    try{
+      const res=await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+        body:JSON.stringify({
+          model:"claude-sonnet-4-20250514",max_tokens:6000,system:SYSTEM_PROMPT,
+          messages:[{role:"user",content:`Generate a complete research report for: ${ticker}. Use web search for current data. Return ONLY raw JSON starting with {`}],
+          tools:[{type:"web_search_20250305",name:"web_search"}],
+        }),
+      });
+      const data=await res.json();
+      if(!res.ok)throw new Error(data.error?.message||`API error ${res.status}`);
+      const fullText=data.content.map(b=>b.type==="text"?b.text:"").join("\n");
+      const parsed=parseReport(fullText);
+      parsed.reportDate=new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
+      setReport(parsed);
+    }catch(err){
+      setError(err.message||"Failed to generate report.");
+    }finally{
+      clearInterval(stepTimer.current);setLoading(false);
+    }
+  }
+
+  if(!apiKey) return <ApiKeyModal onSubmit={setApiKey}/>;
+
+  const upColor=(report?.analystRatings?.updownside||"").startsWith("+")?TEAL:RED;
+  const revColor=(report?.fundamentals?.revenueGrowthYoY||"").startsWith("+")?TEAL:RED;
+
+  return <div style={{background:"#fff",minHeight:"100vh",fontFamily:"DM Sans,sans-serif",backgroundImage:"radial-gradient(ellipse at 20% 0%, rgba(0,98,204,0.05) 0%, transparent 55%), radial-gradient(ellipse at 80% 100%, rgba(4,106,56,0.04) 0%, transparent 55%)"}}>
+
+    {/* Masthead */}
+    <div style={{borderBottom:`3px double ${INK}`,padding:"32px 60px 20px",textAlign:"center"}}>
+      <div style={{borderTop:`1px solid ${INK}`,marginBottom:16}}/>
+      <div style={{fontFamily:"DM Mono,monospace",fontSize:10,letterSpacing:4,textTransform:"uppercase",color:MUTED,marginBottom:8}}>Proprietary Research Intelligence</div>
+      <div style={{fontFamily:"Playfair Display,serif",fontSize:"clamp(32px,5vw,56px)",fontWeight:700,color:INK,letterSpacing:-1}}>
+        <span style={{color:BLUE}}>Lynchpin</span> <span style={{color:GREEN}}>Analytics</span>
+      </div>
+      <div style={{fontFamily:"DM Mono,monospace",fontSize:12,letterSpacing:3,textTransform:"uppercase",color:MUTED,marginTop:8}}>Institutional-Grade Equity Research · Powered by AI</div>
+    </div>
+
+    {/* Search */}
+    <div style={{maxWidth:680,margin:"52px auto",padding:"0 24px",textAlign:"center"}}>
+      <div style={{fontFamily:"DM Mono,monospace",fontSize:10,letterSpacing:3,textTransform:"uppercase",color:MUTED,marginBottom:12}}>Enter Ticker Symbol</div>
+      <div style={{display:"flex"}}>
+        <div style={{flex:1,position:"relative"}} ref={dropRef}>
+          <input ref={inputRef} value={query} onChange={e=>handleInput(e.target.value)} onKeyDown={handleKeyDown}
+            onFocus={()=>{if(suggestions.length>0)setShowDrop(true);}}
+            placeholder="e.g. AAPL or Apple" maxLength={20} autoComplete="off"
+            style={{width:"100%",padding:"18px 24px",fontFamily:"Playfair Display,serif",fontSize:22,fontWeight:600,letterSpacing:3,textTransform:"uppercase",border:`2px solid ${INK}`,borderRight:"none",outline:"none",background:"white",color:INK,boxSizing:"border-box"}}
+          />
+          {showDrop&&suggestions.length>0&&<div style={{position:"absolute",top:"100%",left:0,right:0,background:"#fff",border:`2px solid ${INK}`,borderTop:`1px solid ${RULE}`,boxShadow:"4px 6px 0 rgba(0,0,0,0.12)",zIndex:999,maxHeight:280,overflowY:"auto"}}>
+            {suggestions.map((t,i)=><div key={t.s} onMouseDown={e=>{e.preventDefault();handleSelect(t.s);}}
+              style={{display:"flex",alignItems:"center",gap:14,padding:"11px 18px",cursor:"pointer",borderBottom:i<suggestions.length-1?`1px solid ${RULE}`:"none",background:i===hiIdx?"#f0f5ff":"white"}}>
+              <span style={{fontFamily:"DM Mono,monospace",fontSize:13,fontWeight:500,color:BLUE,minWidth:60,letterSpacing:1}}>{t.s}</span>
+              <span style={{fontFamily:"DM Sans,sans-serif",fontSize:13,color:INK,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.n}</span>
+              <span style={{fontFamily:"DM Mono,monospace",fontSize:9,letterSpacing:1.5,color:MUTED,background:CREAM,padding:"2px 6px",border:`1px solid ${RULE}`,whiteSpace:"nowrap"}}>{t.x}</span>
+            </div>)}
+          </div>}
+        </div>
+        <button onClick={()=>generate()} disabled={loading}
+          style={{padding:"18px 32px",background:loading?MUTED:BLUE,color:"#fff",border:`2px solid ${INK}`,cursor:loading?"not-allowed":"pointer",fontFamily:"DM Mono,monospace",fontSize:11,letterSpacing:2,textTransform:"uppercase",whiteSpace:"nowrap"}}>
+          {loading?"Generating...":"Generate Report →"}
+        </button>
+      </div>
+      <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap",marginTop:16}}>
+        {["AAPL","NVDA","MSFT","AMZN","TSLA","META","COF","AVGO"].map(s=><button key={s} onClick={()=>handleSelect(s)}
+          style={{fontFamily:"DM Mono,monospace",fontSize:10,letterSpacing:2,padding:"4px 10px",border:`1px solid ${RULE}`,color:MUTED,cursor:"pointer",background:"transparent"}}>{s}</button>)}
+      </div>
+    </div>
+
+    {/* Loading */}
+    {loading&&<div style={{maxWidth:800,margin:"60px auto",padding:"0 24px",textAlign:"center"}}>
+      <div style={{fontFamily:"Playfair Display,serif",fontSize:28,color:INK,marginBottom:8}}>Preparing Your Report</div>
+      <ul style={{listStyle:"none",textAlign:"left",display:"inline-block",marginTop:32,padding:0}}>
+        {STEPS.map((label,i)=>{
+          const done=i<step,active=i===step;
+          return <li key={i} style={{fontFamily:"DM Mono,monospace",fontSize:11,letterSpacing:1.5,color:done?TEAL:active?GOLD:MUTED,padding:"6px 0",display:"flex",alignItems:"center",gap:12}}>
+            <span>{done?"✓":active?"◌":"○"}</span>{label}
+          </li>;
+        })}
+      </ul>
+    </div>}
+
+    {/* Error */}
+    {error&&<div style={{border:`2px solid ${RED}`,padding:"24px 32px",maxWidth:600,margin:"40px auto",textAlign:"center",color:RED}}>
+      <strong>Report generation failed</strong><br/><br/>{error}
+    </div>}
+
+    {/* Report */}
+    {report&&!loading&&<div style={{maxWidth:960,margin:"40px auto 80px",padding:"0 24px"}}>
+      {/* Header */}
+      <div style={{background:INK,color:"#fff",padding:"40px 48px",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",right:-20,top:-20,fontFamily:"Playfair Display,serif",fontSize:160,fontWeight:700,opacity:0.06,letterSpacing:-4,lineHeight:1,pointerEvents:"none"}}>{report.ticker}</div>
+        <div style={{fontFamily:"DM Mono,monospace",fontSize:9,letterSpacing:4,textTransform:"uppercase",color:GOLD,marginBottom:12,display:"flex",alignItems:"center",gap:8}}>
+          <span style={{width:24,height:1,background:GOLD,display:"inline-block"}}/>Equity Research Report<span style={{width:24,height:1,background:GOLD,display:"inline-block"}}/>
+        </div>
+        <div style={{fontFamily:"Playfair Display,serif",fontSize:"clamp(24px,4vw,40px)",fontWeight:700,lineHeight:1.1}}>{report.companyName}</div>
+        <div style={{fontFamily:"DM Mono,monospace",fontSize:13,letterSpacing:2,border:`1px solid ${GOLD}`,color:GOLD,padding:"3px 12px",display:"inline-block",marginTop:12}}>{report.ticker} · {report.exchange}</div>
+        <div style={{marginTop:24,display:"flex",gap:32,flexWrap:"wrap"}}>
+          {[["Current Price",report.currentPrice],["Market Cap",report.marketCap],["Sector",report.sector],["1-Year Return",report.oneYearReturn],["Report Date",report.reportDate]].map(([label,val])=><div key={label} style={{fontSize:11,color:"rgba(245,240,232,0.6)",letterSpacing:0.5}}>
+            <strong style={{color:"#fff",display:"block",fontSize:13,marginBottom:2}}>{val}</strong>{label}
+          </div>)}
+        </div>
+      </div>
+
+      {/* Page 1 */}
+      <Page num="01" title="Fundamental Analysis" sub="Valuation & Financials">
+        <SectionHeading>Valuation Overview</SectionHeading>
+        <p style={{fontSize:14,lineHeight:1.75,color:"#2a2420",marginBottom:16}}>{report.fundamentals?.headline}</p>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:1,border:`1px solid ${RULE}`,background:RULE,margin:"20px 0"}}>
+          <MetricCell label="Trailing P/E" value={`${report.fundamentals?.trailingPE}x`} sub="Current"/>
+          <MetricCell label="Forward P/E" value={`${report.fundamentals?.forwardPE}x`} sub="NTM Est."/>
+          <MetricCell label="Industry Avg" value={`${report.fundamentals?.industryAvgPE}x`} sub="Peer Median"/>
+          <MetricCell label="6-Mo Avg P/E" value={`${report.fundamentals?.sixMonthAvgPE}x`} sub="Trailing"/>
+          <MetricCell label="1-Year Avg P/E" value={`${report.fundamentals?.oneYearAvgPE}x`} sub="Historical"/>
+          <MetricCell label="5-Year Avg P/E" value={`${report.fundamentals?.fiveYearAvgPE}x`} sub="Long-Term"/>
+        </div>
+        <SectionHeading>Additional Metrics</SectionHeading>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:1,border:`1px solid ${RULE}`,background:RULE,margin:"20px 0"}}>
+          <MetricCell label="EPS (TTM)" value={report.fundamentals?.eps}/>
+          <MetricCell label="Revenue Growth YoY" value={report.fundamentals?.revenueGrowthYoY} valueColor={revColor}/>
+          <MetricCell label="Gross Margin" value={report.fundamentals?.grossMargin}/>
+        </div>
+        <SectionHeading>Analyst Commentary</SectionHeading>
+        <p style={{fontSize:14,lineHeight:1.75,color:"#2a2420"}}>{report.fundamentals?.commentary}</p>
+      </Page>
+
+      {/* Page 2 */}
+      <Page num="02" title="Technical Analysis & Earnings Summary" sub="Charts & Filings">
+        <SectionHeading>Technical Indicators</SectionHeading>
+        <p style={{fontSize:14,lineHeight:1.75,color:"#2a2420",marginBottom:16}}>{report.technicals?.headline}</p>
+        <div style={{display:"flex",flexDirection:"column",gap:16}}>
+          {(report.technicals?.indicators||[]).map((ind,i)=><IndicatorCard key={i} ind={ind}/>)}
+        </div>
+        <div style={{textAlign:"center",color:RULE,fontSize:18,letterSpacing:12,margin:"24px 0"}}>· · ·</div>
+        <SectionHeading>Earnings & Filings Summary</SectionHeading>
+        <p style={{fontSize:14,lineHeight:1.75,color:"#2a2420",marginBottom:16}}>{report.earningsSummary?.headline}</p>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24}}>
+          <EarningsCard title={`Earnings Call · ${report.earningsSummary?.earningsCall?.date}`} points={report.earningsSummary?.earningsCall?.keyPoints} full/>
+          <EarningsCard title={`10-Q Filing · ${report.earningsSummary?.tenQ?.period}`} points={report.earningsSummary?.tenQ?.keyPoints}/>
+          <EarningsCard title={`Annual Report · ${report.earningsSummary?.annualReport?.year}`} points={report.earningsSummary?.annualReport?.keyPoints}/>
+        </div>
+      </Page>
+
+      {/* Page 3 */}
+      <Page num="03" title="Management & Analyst Ratings" sub="Leadership & Consensus">
+        <SectionHeading>Management Team</SectionHeading>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:20}}>
+          {(report.management||[]).map((m,i)=><MgmtCard key={i} m={m}/>)}
+        </div>
+        <div style={{textAlign:"center",color:RULE,fontSize:18,letterSpacing:12,margin:"24px 0"}}>· · ·</div>
+        <SectionHeading>Analyst Consensus</SectionHeading>
+        <div style={{display:"flex",border:`1px solid ${RULE}`,overflow:"hidden",marginBottom:24}}>
+          {[{label:"Buy / Overweight",val:report.analystRatings?.buyCount,color:TEAL},{label:"Hold / Neutral",val:report.analystRatings?.holdCount,color:GOLD},{label:"Sell / Underweight",val:report.analystRatings?.sellCount,color:RED},{label:"Avg Price Target",val:report.analystRatings?.avgPriceTarget,color:INK,sm:true},{label:"Implied Up/Downside",val:report.analystRatings?.updownside,color:upColor,sm:true}]
+            .map(({label,val,color,sm})=><div key={label} style={{flex:1,padding:"16px 12px",textAlign:"center",borderRight:`1px solid ${RULE}`}}>
+              <div style={{fontFamily:"Playfair Display,serif",fontSize:sm?22:28,fontWeight:700,color}}>{val}</div>
+              <div style={{fontFamily:"DM Mono,monospace",fontSize:8,letterSpacing:2,textTransform:"uppercase",color:MUTED,marginTop:4}}>{label}</div>
+            </div>)}
+        </div>
+        <table style={{width:"100%",borderCollapse:"collapse"}}>
+          <thead><tr>{["Firm","Investment Thesis","Rating","Price Target"].map(h=><th key={h} style={{fontFamily:"DM Mono,monospace",fontSize:8,letterSpacing:2,textTransform:"uppercase",color:MUTED,textAlign:"left",paddingBottom:8,borderBottom:`1px solid ${RULE}`}}>{h}</th>)}</tr></thead>
+          <tbody>{(report.analystRatings?.ratings||[]).map((a,i)=>{
+            const rs=ratingStyle(a.rating);
+            return <tr key={i}>
+              <td style={{padding:"10px 0",borderBottom:"1px solid rgba(200,191,168,0.3)",verticalAlign:"top"}}>
+                <div style={{fontWeight:500,color:INK,fontSize:13}}>{a.firm}</div>
+                <div style={{fontSize:11,color:MUTED,marginTop:2}}>{a.analyst}</div>
+              </td>
+              <td style={{padding:"10px 16px 10px 0",fontSize:13,color:MUTED,lineHeight:1.5,borderBottom:"1px solid rgba(200,191,168,0.3)",verticalAlign:"top"}}>{a.note}</td>
+              <td style={{padding:"10px 0",borderBottom:"1px solid rgba(200,191,168,0.3)",verticalAlign:"top"}}><Badge color={rs.color} bg={rs.bg} border={rs.border}>{a.rating}</Badge></td>
+              <td style={{padding:"10px 0",fontFamily:"DM Mono,monospace",fontSize:12,color:INK,whiteSpace:"nowrap",borderBottom:"1px solid rgba(200,191,168,0.3)",verticalAlign:"top"}}>{a.priceTarget}</td>
+            </tr>;
+          })}</tbody>
+        </table>
+      </Page>
+
+      {/* Footer */}
+      <div style={{border:`2px solid ${INK}`,borderTop:`1px solid ${RULE}`,background:CREAM,padding:"20px 40px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
+        <div style={{fontSize:10,color:MUTED,fontStyle:"italic",maxWidth:500,lineHeight:1.5}}>This report is generated by artificial intelligence for informational purposes only. It does not constitute investment advice. Always consult a licensed financial advisor.</div>
+        <div style={{fontFamily:"Playfair Display,serif",fontSize:13,color:MUTED,fontStyle:"italic"}}>Lynchpin Analytics · {report.reportDate}</div>
+      </div>
+    </div>}
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
